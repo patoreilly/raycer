@@ -423,6 +423,8 @@ var Demo = new Phaser.Class({
     create: function ()
     {
         // global
+        this.globalStartTime; 
+        this.newLapTimeMark;
         
 
         this.fDistance = 0.0;        // Distance car has travelled around track
@@ -492,7 +494,7 @@ var Demo = new Phaser.Class({
         
         this.raycer_cycle_sprite = this.add.image(0,0,'raycer_cycle');
 
-        //input 
+        /// keyboard input 
         cursors = this.input.keyboard.createCursorKeys();
 
         /// activates gamepad in this scene
@@ -506,6 +508,32 @@ var Demo = new Phaser.Class({
         }, this);
 
 
+        /// touch input gui
+        if (touchActivated)
+        {
+            this.input.addPointer(1);
+            this.textures.generate('chunk', { data: ['A'], pixelWidth: 1});
+
+            guide_multi = this.add.image(280,148,'chunk').setDisplaySize(64, 64).setAlpha(.5).setDepth(200).setInteractive();
+            
+            guide_multi.on('pointermove', function () {gTouching = true}, this);
+            guide_multi.on('pointerout', function () {gTouching = false; guiLeft = false; guiRight = false; guiUp = false}, this);
+
+            this.textures.generate('h_arrow', { data: guideInputHorizontalData, pixelWidth: 2});
+            this.textures.generate('v_arrow', { data: guideInputVerticalData, pixelWidth: 2});
+
+            guide_left = this.add.image(260,148,'h_arrow').setAlpha(.5);
+            guide_right = this.add.image(300,148,'h_arrow').toggleFlipX().setAlpha(.5);
+
+            guide_up = this.add.image(280,128,'v_arrow').setAlpha(.5);
+            guide_down = this.add.image(280,168,'v_arrow').toggleFlipY().setAlpha(.5);
+        }
+        
+        /// mark global start time
+
+        this.globalStartTime = game.loop.now;
+        this.newLapTimeMark = 0;
+
         /// debug global
         debug = this.add.text(10, 10, '', { font: '10px Arial', fill: '#ffffff' });
         
@@ -516,7 +544,9 @@ var Demo = new Phaser.Class({
     
     update: function()
     {
-        //var fElapsedTime = .0000001 * game.loop.now;
+
+        
+        var fElapsedTime = (game.loop.now - this.globalStartTime)/1000;
 
         //instead of fElapsedTime, fSpeedFactor will scale range of throttling (which effectively represents gear shifting for lower to higher ranges of speed)
 
@@ -530,20 +560,36 @@ var Demo = new Phaser.Class({
 
         if (!gamepad)
         {
-            if (cursors.up.isDown)
+            
+
+            if (gTouching)
+            {
+                var touchXDelta = (guide_multi.input.localX-.5);
+                var touchYDelta = (guide_multi.input.localY-.5);
+
+                if (touchXDelta<-.25) guiLeft=true
+                    else guiLeft=false;
+                if (touchXDelta>.25) guiRight=true
+                    else guiRight=false;
+                if (touchYDelta<-.25) guiUp=true
+                    else guiUp=false;
+            }
+            
+
+            if (cursors.up.isDown || guiUp)
                 this.fSpeed += 2.0 * fSpeedFactor;
             else
                 this.fSpeed -= 1.0 * fSpeedFactor;
 
             // Car Curvature is accumulated left/right input, but inversely proportional to speed
             // i.e. it is harder to turn at high speed
-            if (cursors.left.isDown)
+            if (cursors.left.isDown || guiLeft)
             {
                 this.fPlayerCurvature -= 2.0 * fSpeedFactor * (1.0 - this.fSpeed / 2.0);
                 nCarDirection = -1;
             }
 
-            if (cursors.right.isDown)
+            if (cursors.right.isDown || guiRight)
             {
                 this.fPlayerCurvature += 2.0 * fSpeedFactor * (1.0 - this.fSpeed / 2.0);
                 nCarDirection = +1;
@@ -595,13 +641,14 @@ var Demo = new Phaser.Class({
         var nTrackSection = 0;
 
         // Lap Timing and counting
-        this.fCurrentLapTime += fSpeedFactor;
+        this.fCurrentLapTime = fElapsedTime - this.newLapTimeMark;
         if (this.fDistance >= this.fTrackDistance)
         {
             this.fDistance -= this.fTrackDistance;
             this.listLapTimes.unshift(this.fCurrentLapTime);
             this.listLapTimes.pop();
             this.fCurrentLapTime = 0.0;
+            this.newLapTimeMark = game.loop.now/1000;
         }
         
         // Find position on track (could optimise)
@@ -708,7 +755,11 @@ var Demo = new Phaser.Class({
         // current accumulated track curvature, and current accumulated player curvature
         // i.e. if they are similar, the car will be in the middle of the track
         this.fCarPos = this.fPlayerCurvature - this.fTrackCurvature;
-        var nCarPos = this.GameWidth / 2 + Math.round((this.GameWidth * this.fCarPos) / 2.0); 
+        var nCarPos = this.GameWidth / 2 + Math.round((this.GameWidth * this.fCarPos) / 2.0);
+
+        // Clamp car position
+        if (nCarPos < 0)  nCarPos = 0;
+        if (nCarPos > this.GameWidth)  nCarPos = this.GameWidth;
 
         // Draw a car that represents what the player is doing. Apologies for the quality
         // of the sprite... :-(
@@ -733,14 +784,13 @@ var Demo = new Phaser.Class({
         var debugt = [];
                 
                 debugt.push('fps: '+ Math.floor(this.sys.game.loop.actualFps.toString()) );
-                //debugt.push('this.background_arc: '+ this.background_arc );
-                debugt.push('this.background_image.x: '+ this.background_image.x );
-                //debugt.push('this.fTrackCurvature: '+ this.fTrackCurvature );
-                debugt.push('this.fCurvature: '+ this.fCurvature );
-                // debugt.push('playerYCell: '+ playerYCell );
-                //debugt.push('track--deltax: '+ trackBotSprite.lastPoint.x );
+                debugt.push('fElapsedTime: '+ fElapsedTime );
+                debugt.push('this.fCurrentLapTime: '+ this.fCurrentLapTime );
+                debugt.push('this.fDistance: '+ Math.round(this.fDistance) );
+                
+                // debugt.push('touchXDelta: '+ touchXDelta );
 
-                //debugt.push('track--deltay: '+ trackBotSprite.lastPoint.y );
+                // debugt.push('touchYDelta: '+ touchYDelta );
 
                 
         debug.setText(debugt);
@@ -852,6 +902,23 @@ var palette_raycer = {
     8: '#999999'  //grey
 };
                             
+var guide_multi_activeY;
+var guide_multi;
+var guide_zspeed;
+var guide_left;
+var guide_right;
+var guide_forward;
+var guide_back;
+var guide_up;
+var guide_down;
+
+var gTouching = false;
+var guiLeft = false;
+var guiRight = false;
+var guiForward = false;
+var guiBack = false;
+var guiUp = false;
+var guiDown = false;
 
 var accessMenuData = [
 "................",
