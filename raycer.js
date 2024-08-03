@@ -54,6 +54,7 @@ var Menu = new Phaser.Class({
 
 
         // load game assets
+        this.load.image('background', 'sprites/backscroll.png')
         this.load.image('raycer_cycle', 'sprites/raycer_cycle.png');
         this.load.image('raycer_cycle_L', 'sprites/raycer_cycle_L.png');
         this.load.image('raycer_cycle_R', 'sprites/raycer_cycle_R.png');
@@ -438,16 +439,25 @@ var Demo = new Phaser.Class({
         this.vecTrack = []; // Track sections, sharpness of bend, length of section
 
         // Define track
-        this.vecTrack.push( {curvature:0.0, distance:10.0} );     // Short section for start/finish line
-        this.vecTrack.push( {curvature:0.0, distance:200.0} );
+        this.vecTrack.push( {curvature:0.0, distance:100.0} );     // Short section for start/finish line
+        this.vecTrack.push( {curvature:0.5, distance:200.0} );
         this.vecTrack.push( {curvature:1.0, distance:200.0} );
-        this.vecTrack.push( {curvature:0.0, distance:400.0} );
-        this.vecTrack.push( {curvature:-1.0, distance:100.0} );
-        this.vecTrack.push( {curvature:0.0, distance:200.0} );
+        this.vecTrack.push( {curvature:1.0, distance:400.0} );
+        this.vecTrack.push( {curvature:1.0, distance:100.0} );
+        this.vecTrack.push( {curvature:-1.0, distance:200.0} );
+        this.vecTrack.push( {curvature:-1.0, distance:400.0} );
+        this.vecTrack.push( {curvature:1.0, distance:200.0} );
+        this.vecTrack.push( {curvature:1.0, distance:200.0} );
+        this.vecTrack.push( {curvature:1.0, distance:200.0} );
+        this.vecTrack.push( {curvature:1.0, distance:200.0} );
+        this.vecTrack.push( {curvature:-0.5, distance:500.0} );
+        this.vecTrack.push( {curvature:-1.0, distance:200.0} );
+        this.vecTrack.push( {curvature:-1.0, distance:200.0} );
         this.vecTrack.push( {curvature:-1.0, distance:200.0} );
         this.vecTrack.push( {curvature:1.0, distance:200.0} );
-        this.vecTrack.push( {curvature:0.0, distance:200.0} );
-        this.vecTrack.push( {curvature:0.2, distance:500.0} );
+        this.vecTrack.push( {curvature:-1.0, distance:200.0} );
+        this.vecTrack.push( {curvature:1.0, distance:200.0} );
+        this.vecTrack.push( {curvature:0.5, distance:500.0} );
         this.vecTrack.push( {curvature:0.0, distance:200.0} );
 
         // Calculate total track distance, so we can set lap times
@@ -466,14 +476,20 @@ var Demo = new Phaser.Class({
         this.GameHeight = 200;
         this.GameWidth = 320;
         
-        // game display buffer
+        // game display buffer (outputs primary game mechanic for road animation)
         this.gamedisplay = {};
         this.gamedisplay.buffer = this.textures.createCanvas('gamedisplaycanvas', this.GameWidth, this.GameHeight); 
         this.gamedisplay.context = this.gamedisplay.buffer.getContext('2d', {willReadFrequently:true});
         this.gamedisplay.imagedata =  this.gamedisplay.context.getImageData(0,0,this.gamedisplay.buffer.width, this.gamedisplay.buffer.height);
         this.gamedisplay.pixels = this.gamedisplay.imagedata.data;
 
+        // add images of background, gamedisplay, cycle sprite
+
+        this.background_image = this.add.image(0,0,'background').setOrigin(0).setScale(1);
+        this.background_arc = 0;
+
         this.add.image(0,0,'gamedisplaycanvas').setOrigin(0).setScale(1);
+        
         this.raycer_cycle_sprite = this.add.image(0,0,'raycer_cycle');
 
         //input 
@@ -488,6 +504,10 @@ var Demo = new Phaser.Class({
         gamepad = pad;
 
         }, this);
+
+
+        /// debug global
+        debug = this.add.text(10, 10, '', { font: '10px Arial', fill: '#ffffff' });
         
 
     }, ////// END OF create()
@@ -496,9 +516,13 @@ var Demo = new Phaser.Class({
     
     update: function()
     {
-        var fElapsedTime = .0000001 * game.loop.now;
+        //var fElapsedTime = .0000001 * game.loop.now;
 
+        //instead of fElapsedTime, fSpeedFactor will scale range of throttling (which effectively represents gear shifting for lower to higher ranges of speed)
 
+        //var fSpeedFactor = .015; //1st gear
+        //var fSpeedFactor = .02; //2nd gear
+        var fSpeedFactor = .025; //3rd gear
 
         // Handle control input
         var nCarDirection = 0;
@@ -507,21 +531,21 @@ var Demo = new Phaser.Class({
         if (!gamepad)
         {
             if (cursors.up.isDown)
-                this.fSpeed += 2.0 * fElapsedTime;
+                this.fSpeed += 2.0 * fSpeedFactor;
             else
-                this.fSpeed -= 1.0 * fElapsedTime;
+                this.fSpeed -= 1.0 * fSpeedFactor;
 
             // Car Curvature is accumulated left/right input, but inversely proportional to speed
             // i.e. it is harder to turn at high speed
             if (cursors.left.isDown)
             {
-                this.fPlayerCurvature -= 2.0 * fElapsedTime * (1.0 - this.fSpeed / 2.0);
+                this.fPlayerCurvature -= 2.0 * fSpeedFactor * (1.0 - this.fSpeed / 2.0);
                 nCarDirection = -1;
             }
 
             if (cursors.right.isDown)
             {
-                this.fPlayerCurvature += 2.0 * fElapsedTime * (1.0 - this.fSpeed / 2.0);
+                this.fPlayerCurvature += 2.0 * fSpeedFactor * (1.0 - this.fSpeed / 2.0);
                 nCarDirection = +1;
             }
         }
@@ -529,21 +553,21 @@ var Demo = new Phaser.Class({
         else
         {
             if (gamepad.up)
-                this.fSpeed += 2.0 * fElapsedTime;
+                this.fSpeed += 2.0 * fSpeedFactor;
             else
-                this.fSpeed -= 1.0 * fElapsedTime;
+                this.fSpeed -= 1.0 * fSpeedFactor;
 
             // Car Curvature is accumulated left/right input, but inversely proportional to speed
             // i.e. it is harder to turn at high speed
             if (gamepad.left)
             {
-                this.fPlayerCurvature -= 2.0 * fElapsedTime * (1.0 - this.fSpeed / 2.0);
+                this.fPlayerCurvature -= 2.0 * fSpeedFactor * (1.0 - this.fSpeed / 2.0);
                 nCarDirection = -1;
             }
 
             if (gamepad.right)
             {
-                this.fPlayerCurvature += 2.0 * fElapsedTime * (1.0 - this.fSpeed / 2.0);
+                this.fPlayerCurvature += 2.0 * fSpeedFactor * (1.0 - this.fSpeed / 2.0);
                 nCarDirection = +1;
             }            
         }
@@ -555,23 +579,23 @@ var Demo = new Phaser.Class({
         // If car curvature is too different to track curvature, slow down
         // as car has gone off track
         if (Math.abs(this.fPlayerCurvature - this.fTrackCurvature) >= 0.8)
-            this.fSpeed -= 5.0 * fElapsedTime;
+            this.fSpeed -= 5.0 * fSpeedFactor;
 
         // Clamp Speed
         if (this.fSpeed < 0.0)  this.fSpeed = 0.0;
         if (this.fSpeed > 1.0)  this.fSpeed = 1.0;
         
         // Move car along track according to car speed
-        this.fDistance += (70.0 * this.fSpeed) * fElapsedTime;
+        this.fDistance += (70.0 * this.fSpeed) * fSpeedFactor;
 
-        //this.fDistance += fElapsedTime;
+        //this.fDistance += fSpeedFactor;
         
         // Get Point on track
         var fOffset = 0.0;
         var nTrackSection = 0;
 
         // Lap Timing and counting
-        this.fCurrentLapTime += fElapsedTime;
+        this.fCurrentLapTime += fSpeedFactor;
         if (this.fDistance >= this.fTrackDistance)
         {
             this.fDistance -= this.fTrackDistance;
@@ -589,32 +613,41 @@ var Demo = new Phaser.Class({
         
         // Interpolate towards target track curvature
         var fTargetCurvature = this.vecTrack[nTrackSection - 1].curvature;
-        var fTrackCurveDiff = (fTargetCurvature - this.fCurvature) * fElapsedTime * this.fSpeed;
+        var fTrackCurveDiff = (fTargetCurvature - this.fCurvature) * fSpeedFactor * this.fSpeed;
 
         // Accumulate player curvature
         this.fCurvature += fTrackCurveDiff;
 
         // Accumulate track curvature
-        this.fTrackCurvature += (this.fCurvature) * fElapsedTime * this.fSpeed;
+        this.fTrackCurvature += (this.fCurvature) * fSpeedFactor * this.fSpeed;
 
 
 
-        // Draw Sky - light blue and dark blue
-        for (var y = 0; y < this.GameHeight / 2; y++)
-            for (var x = 0; x < this.GameWidth; x++)
-                this.drawPixel(x, y, y< this.GameHeight / 4 ?  'cyan' : 'blue' );
+        // // Draw Sky - light blue and dark blue
+        // for (var y = 0; y < this.GameHeight / 2; y++)
+        //     for (var x = 0; x < this.GameWidth; x++)
+        //         this.drawPixel(x, y, y< this.GameHeight / 4 ?  'cyan' : 'blue' );
 
 
 
-        // Draw Scenery - our hills are a rectified sine wave, where the phase is adjusted by the
-        // accumulated track curvature
-        for (var x = 0; x < this.GameWidth; x++)
-        {
-            var nHillHeight = Math.round(Math.abs(Math.sin(x * 0.01 + this.fTrackCurvature) * 16.0));
-            for (var y = (this.GameHeight / 2) - nHillHeight; y < this.GameHeight / 2; y++)
-                this.drawPixel(x, y, 'orange');
-        }
+        // // Draw Scenery - our hills are a rectified sine wave, where the phase is adjusted by the
+        // // accumulated track curvature
+        // for (var x = 0; x < this.GameWidth; x++)
+        // {
+        //     var nHillHeight = Math.round(Math.abs(Math.sin(x * 0.01 + this.fTrackCurvature) * 16.0));
+        //     for (var y = (this.GameHeight / 2) - nHillHeight; y < this.GameHeight / 2; y++)
+        //         this.drawPixel(x, y, 'orange');
+        // }
 
+        this.background_arc -= this.fCurvature*this.fSpeed;
+
+        if (this.background_arc<-this.GameWidth*2)
+            this.background_arc = (this.GameWidth*2+this.background_arc);
+        else if (this.background_arc>0)
+            this.background_arc = -(this.background_image.width-this.GameWidth-this.background_arc);   
+
+        
+        this.background_image.setPosition(Math.round(this.background_arc),0);
 
 
 
@@ -694,6 +727,23 @@ var Demo = new Phaser.Class({
             break;
         }
     
+
+
+
+        var debugt = [];
+                
+                debugt.push('fps: '+ Math.floor(this.sys.game.loop.actualFps.toString()) );
+                //debugt.push('this.background_arc: '+ this.background_arc );
+                debugt.push('this.background_image.x: '+ this.background_image.x );
+                //debugt.push('this.fTrackCurvature: '+ this.fTrackCurvature );
+                debugt.push('this.fCurvature: '+ this.fCurvature );
+                // debugt.push('playerYCell: '+ playerYCell );
+                //debugt.push('track--deltax: '+ trackBotSprite.lastPoint.x );
+
+                //debugt.push('track--deltay: '+ trackBotSprite.lastPoint.y );
+
+                
+        debug.setText(debugt);
     },
 
     drawPixel: function(xpos,ypos,colorkey)
@@ -757,6 +807,8 @@ var config = {
 };
 
 var game = new Phaser.Game(config);
+
+var debug;
 
 var file_thumbs = [];
 var allImageKeys = [];
