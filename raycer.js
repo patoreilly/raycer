@@ -784,9 +784,9 @@ var Demo = new Phaser.Class({
         var debugt = [];
                 
                 debugt.push('fps: '+ Math.floor(this.sys.game.loop.actualFps.toString()) );
-                debugt.push('fElapsedTime: '+ fElapsedTime );
-                debugt.push('this.fCurrentLapTime: '+ this.fCurrentLapTime );
-                debugt.push('this.fDistance: '+ Math.round(this.fDistance) );
+                // debugt.push('fElapsedTime: '+ fElapsedTime );
+                // debugt.push('this.fCurrentLapTime: '+ this.fCurrentLapTime );
+                debugt.push('Distance: '+ Math.round(this.fDistance) );
                 
                 // debugt.push('touchXDelta: '+ touchXDelta );
 
