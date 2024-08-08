@@ -58,6 +58,9 @@ var Menu = new Phaser.Class({
         this.load.image('raycer_cycle', 'sprites/raycer_cycle.png');
         this.load.image('raycer_cycle_L', 'sprites/raycer_cycle_L.png');
         this.load.image('raycer_cycle_R', 'sprites/raycer_cycle_R.png');
+        this.load.image('rock', 'sprites/rock8.png');
+        this.load.image('scenery_tree', 'sprites/tree9.png');
+
         //////////////////
         
         loadfile_index = 0;
@@ -263,9 +266,9 @@ var Menu = new Phaser.Class({
 
             sound_enabled = true;
 
-            //this.scale.startFullscreen();
+            this.scale.startFullscreen();
 
-            //screen.orientation.lock('landscape');
+            screen.orientation.lock('landscape');
             
             touchActivated = true;
 
@@ -426,8 +429,9 @@ var Demo = new Phaser.Class({
         this.globalStartTime; 
         this.newLapTimeMark;
         
+        
 
-        this.fDistance = 0.0;        // Distance car has travelled around track
+        this.fDistance = 0.0;        // Distance car has travelled around track in 'meters'
         this.fCurvature = 0.0;        // Current track curvature, lerped between track sections
         this.fTrackCurvature = 0.0;   // Accumulation of track curvature
         this.fTrackDistance = 0.0;    // Total distance of track
@@ -442,24 +446,12 @@ var Demo = new Phaser.Class({
 
         // Define track
         this.vecTrack.push( {curvature:0.0, distance:100.0} );     // Short section for start/finish line
-        this.vecTrack.push( {curvature:0.5, distance:200.0} );
-        this.vecTrack.push( {curvature:1.0, distance:200.0} );
-        this.vecTrack.push( {curvature:1.0, distance:400.0} );
-        this.vecTrack.push( {curvature:1.0, distance:100.0} );
-        this.vecTrack.push( {curvature:-1.0, distance:200.0} );
-        this.vecTrack.push( {curvature:-1.0, distance:400.0} );
-        this.vecTrack.push( {curvature:1.0, distance:200.0} );
-        this.vecTrack.push( {curvature:1.0, distance:200.0} );
-        this.vecTrack.push( {curvature:1.0, distance:200.0} );
-        this.vecTrack.push( {curvature:1.0, distance:200.0} );
-        this.vecTrack.push( {curvature:-0.5, distance:500.0} );
-        this.vecTrack.push( {curvature:-1.0, distance:200.0} );
-        this.vecTrack.push( {curvature:-1.0, distance:200.0} );
-        this.vecTrack.push( {curvature:-1.0, distance:200.0} );
-        this.vecTrack.push( {curvature:1.0, distance:200.0} );
-        this.vecTrack.push( {curvature:-1.0, distance:200.0} );
-        this.vecTrack.push( {curvature:1.0, distance:200.0} );
-        this.vecTrack.push( {curvature:0.5, distance:500.0} );
+        this.vecTrack.push( {curvature:-0.5, distance:200.0} );
+        this.vecTrack.push( {curvature:0.25, distance:200.0} );
+        this.vecTrack.push( {curvature:0.29, distance:400.0} );
+        this.vecTrack.push( {curvature:0.15, distance:100.0} );
+        this.vecTrack.push( {curvature:0.3, distance:200.0} );
+        
         this.vecTrack.push( {curvature:0.0, distance:200.0} );
 
         // Calculate total track distance, so we can set lap times
@@ -485,7 +477,7 @@ var Demo = new Phaser.Class({
         this.gamedisplay.imagedata =  this.gamedisplay.context.getImageData(0,0,this.gamedisplay.buffer.width, this.gamedisplay.buffer.height);
         this.gamedisplay.pixels = this.gamedisplay.imagedata.data;
 
-        // add images of background, gamedisplay, cycle sprite
+        // init images of background, scenery, obstacles, gamedisplay, cycle sprite
 
         this.background_image = this.add.image(0,0,'background').setOrigin(0).setScale(1);
         this.background_arc = 0;
@@ -493,6 +485,57 @@ var Demo = new Phaser.Class({
         this.add.image(0,0,'gamedisplaycanvas').setOrigin(0).setScale(1);
         
         this.raycer_cycle_sprite = this.add.image(0,0,'raycer_cycle');
+
+        //obstacles (testing rock sprite for now)
+        this.rock_sprite = this.add.image(0,0,'rock').setVisible(false);
+        this.rock_location = {distance:1000.0, position:0.0}; // 1000 meters up, in the middle of track
+
+        //total set of scenery objects
+        this.scenery_group = this.add.group();
+        this.scenery_groupArray = this.scenery_group.getChildren();
+
+        var scenery_sprite; //worker just to init sprites in group
+
+        // for (var i = 0; i < 1; i++)
+        // {
+            scenery_sprite = this.add.image(0,0,'scenery_tree').setOrigin(.5,1.0).setVisible(false);
+            scenery_sprite.label = 'scenery_firtree';
+            scenery_sprite.location = {distance:500.0, orientation:'left'};
+
+            this.scenery_group.add(scenery_sprite);
+
+            scenery_sprite = this.add.image(0,0,'scenery_tree').setOrigin(.5,1.0).setVisible(false);
+            scenery_sprite.label = 'scenery_firtree';
+            scenery_sprite.location = {distance:520.0, orientation:'left'};
+
+            this.scenery_group.add(scenery_sprite);
+
+            scenery_sprite = this.add.image(0,0,'scenery_tree').setOrigin(.5,1.0).setVisible(false);
+            scenery_sprite.label = 'scenery_firtree';
+            scenery_sprite.location = {distance:540.0, orientation:'left'};
+
+            this.scenery_group.add(scenery_sprite);
+
+            scenery_sprite = this.add.image(0,0,'scenery_tree').setOrigin(.5,1.0).setVisible(false);
+            scenery_sprite.label = 'scenery_firtree';
+            scenery_sprite.location = {distance:560.0, orientation:'left'};
+
+            this.scenery_group.add(scenery_sprite);
+
+            scenery_sprite = this.add.image(0,0,'scenery_tree').setOrigin(.5,1.0).setVisible(false);
+            scenery_sprite.label = 'scenery_firtree';
+            scenery_sprite.location = {distance:580.0, orientation:'left'};
+
+            this.scenery_group.add(scenery_sprite);
+
+            scenery_sprite = this.add.image(0,0,'scenery_tree').setOrigin(.5,1.0).setVisible(false);
+            scenery_sprite.label = 'scenery_firtree';
+            scenery_sprite.location = {distance:550.0, orientation:'right'};
+
+            this.scenery_group.add(scenery_sprite);
+        // }
+
+
 
         /// keyboard input 
         cursors = this.input.keyboard.createCursorKeys();
@@ -550,9 +593,9 @@ var Demo = new Phaser.Class({
 
         //instead of fElapsedTime, fSpeedFactor will scale range of throttling (which effectively represents gear shifting for lower to higher ranges of speed)
 
-        //var fSpeedFactor = .015; //1st gear
-        //var fSpeedFactor = .02; //2nd gear
-        var fSpeedFactor = .025; //3rd gear
+        //var fSpeedFactor = .0075; //1st gear
+        //var fSpeedFactor = .0145; //2nd gear
+        var fSpeedFactor = .018; //3rd gear
 
         // Handle control input
         var nCarDirection = 0;
@@ -670,42 +713,33 @@ var Demo = new Phaser.Class({
 
 
 
-        // // Draw Sky - light blue and dark blue
-        // for (var y = 0; y < this.GameHeight / 2; y++)
-        //     for (var x = 0; x < this.GameWidth; x++)
-        //         this.drawPixel(x, y, y< this.GameHeight / 4 ?  'cyan' : 'blue' );
-
-
-
-        // // Draw Scenery - our hills are a rectified sine wave, where the phase is adjusted by the
-        // // accumulated track curvature
-        // for (var x = 0; x < this.GameWidth; x++)
-        // {
-        //     var nHillHeight = Math.round(Math.abs(Math.sin(x * 0.01 + this.fTrackCurvature) * 16.0));
-        //     for (var y = (this.GameHeight / 2) - nHillHeight; y < this.GameHeight / 2; y++)
-        //         this.drawPixel(x, y, 'orange');
-        // }
-
+        // Draw Background
+        // seamless background scrolling technique: background image width is 3x gamewidth,
+        // the first two thirds of the image has the beginning and ending edges that meet seemlessly
+        // the last 1/3 of the background image copies first 1/3 so it can wrap seemlessly when animated
+        
+        // calculate the movement
         this.background_arc -= this.fCurvature*this.fSpeed;
 
+        // wrap the image if needed
         if (this.background_arc<-this.GameWidth*2)
             this.background_arc = (this.GameWidth*2+this.background_arc);
         else if (this.background_arc>0)
             this.background_arc = -(this.background_image.width-this.GameWidth-this.background_arc);   
-
         
         this.background_image.setPosition(Math.round(this.background_arc),0);
 
-
+        
+        
+        var lastClipColour;
+        var nClipColour;
 
         // Draw Track - Each row is split into grass, clip-board and track
         for (var y = 0; y < this.GameHeight / 2; y++)
         {
+
             for (var x = 0; x < this.GameWidth; x++)
             {
-                
-                
-
                 // Perspective is used to modify the width of the track row segments
                 var fPerspective = y / (this.GameHeight/2.0);
                 var fRoadWidth = 0.02 + fPerspective * 0.8; // Min 10% Max 90%
@@ -715,8 +749,6 @@ var Demo = new Phaser.Class({
                 // ...depending on where the middle point is, which is defined by the current
                 // track curvature.
                 var fMiddlePoint = 0.5 + this.fCurvature * Math.pow((1.0 - fPerspective), 3);
-
-                
 
                 // Work out segment boundaries
                 var nLeftGrass = Math.round( (fMiddlePoint - fRoadWidth - fClipWidth) * this.GameWidth );
@@ -728,11 +760,16 @@ var Demo = new Phaser.Class({
 
                 // Using periodic oscillatory functions to give lines, where the phase is controlled
                 // by the distance around the track. These take some fine tuning to give the right "feel"
-                var nGrassColour = Math.sin(20.0 *  Math.pow(1.0 - fPerspective,3) + this.fDistance * 0.1) > 0.0 ? 'green' : 'darkgreen';
-                var nClipColour = Math.sin(40.0 *  Math.pow(1.0 - fPerspective, 3) + this.fDistance) > 0.0 ? 'red' : 'white';
+                var nGrassColour = Math.sin(20.0 *  Math.pow(1.0 - fPerspective, 3) + this.fDistance * 0.1) > 0.0 ? 'green' : 'darkgreen';
+                nClipColour = Math.sin(40.0 *  Math.pow(1.0 - fPerspective, 3) + this.fDistance) > 0.0 ? 'red' : 'white';
                 
+                // if (nClipColour == 'red' && lastClipColour == 'white') var nRoadColour='blue'
+                //     else var nRoadColour='grey'
+
                 // Start finish straight changes the road colour to inform the player lap is reset
-                //int nRoadColour = (nTrackSection-1) == 0 ? FG_WHITE : FG_GREY;
+                //var nRoadColour = Phaser.Math.Fuzzy.Equal( (this.fDistance-y), Math.round((this.fDistance-y)), .01) ? 'grey' : 'blue';
+                //var roundedDistance = Math.round(this.fDistance);
+                //var nRoadColour = Math.round((roundedDistance-y)/10) == (roundedDistance-y)/10 ? 'blue' : 'grey';
 
                 // Draw the row segments
                 if (x >= 0 && x < nLeftGrass)
@@ -745,11 +782,15 @@ var Demo = new Phaser.Class({
                     this.drawPixel(x, nRow, nClipColour);
                 if (x >= nRightGrass && x < this.GameWidth)
                     this.drawPixel(x, nRow, nGrassColour);
-
             }
+            lastClipColour = nClipColour;
+
         }
+        // after the pixels have been updated put the new image data into the context and refresh the buffer
         this.gamedisplay.context.putImageData(this.gamedisplay.imagedata,0,0);
         this.gamedisplay.buffer.refresh();
+
+
 
         // Draw Car - car position on road is proportional to difference between
         // current accumulated track curvature, and current accumulated player curvature
@@ -780,15 +821,83 @@ var Demo = new Phaser.Class({
     
 
 
+        // Draw road sprites
+        if (this.fDistance>=this.rock_location.distance && this.fDistance<this.rock_location.distance+70)
+        {
+            this.rock_sprite.setVisible(true);
+
+            var rockZ = this.fDistance-(this.rock_location.distance);
+            var rockY = ((rockZ)*(rockZ)*(rockZ))/2000;
+
+            console.log(rockY);
+
+            var rockPerspective = rockY / (this.GameHeight/2.0);
+            var rockMiddlePoint = 0.5 + this.fCurvature * Math.pow((1.0 - rockPerspective), 3);
+            var rockX = Math.round(rockMiddlePoint * this.GameWidth);
+            
+            var nRow = this.GameHeight / 2 + rockY;
+
+            this.rock_sprite.setPosition(rockX,nRow).setScale(rockPerspective);
+            
+        }
+        else
+        {
+            this.rock_sprite.setVisible(false);
+        }
+
+
+        // Draw scenery sprites
+        var thisContext=this;
+        this.scenery_group.children.iterate( 
+            function(_sprite)
+            { 
+                // _sprite.setVisible(true);
+
+                // console.log(_sprite.location.distance);
+                // console.log(_sprite.location.orientation);
+
+                if ( thisContext.fDistance>=_sprite.location.distance && thisContext.fDistance<_sprite.location.distance+70 )
+                {
+                    _sprite.setVisible(true);
+
+                    var _spriteZ = thisContext.fDistance-(_sprite.location.distance);
+
+                    var _spriteY = ((_spriteZ)*(_spriteZ)*(_spriteZ))/2000;
+                    
+
+            
+                    var _spritePerspective = _spriteY / (thisContext.GameHeight/2.0);
+                    var _spriteMiddlePoint = 0.5 + thisContext.fCurvature * Math.pow((1.0 - _spritePerspective), 3);
+                    //var _spriteX = Math.round(_spriteMiddlePoint * this.GameWidth);
+
+                    var fRoadWidth = 0.02 + _spritePerspective * 0.8; // Min 10% Max 90%
+                    var fClipWidth = fRoadWidth * 0.15;
+                    fRoadWidth *= 0.5; // Halve it as track is symmetrical around center of track, but offset...
+
+                    var nLeftGrass = Math.round( (_spriteMiddlePoint - fRoadWidth - fClipWidth) * thisContext.GameWidth );
+                    var nRightGrass = Math.round( (_spriteMiddlePoint + fRoadWidth + fClipWidth) * thisContext.GameWidth );
+                    
+                    var nRow = thisContext.GameHeight / 2 + _spriteY;
+                    
+                    if (_sprite.location.orientation == 'left') _sprite.setPosition(nLeftGrass,nRow).setScale(_spritePerspective)
+                        else _sprite.setPosition(nRightGrass,nRow).setScale(_spritePerspective)
+            
+                }
+                else
+                {
+                    _sprite.setVisible(false);
+                }
+
+            } );
+
 
         var debugt = [];
                 
                 debugt.push('fps: '+ Math.floor(this.sys.game.loop.actualFps.toString()) );
                 // debugt.push('fElapsedTime: '+ fElapsedTime );
                 // debugt.push('this.fCurrentLapTime: '+ this.fCurrentLapTime );
-                debugt.push('Distance: '+ Math.round(this.fDistance) );
-                
-                // debugt.push('touchXDelta: '+ touchXDelta );
+                debugt.push('Distance: '+ this.fDistance);
+                debugt.push('fOffset: '+ fOffset );
 
                 // debugt.push('touchYDelta: '+ touchYDelta );
 
