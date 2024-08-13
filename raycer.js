@@ -54,12 +54,22 @@ var Menu = new Phaser.Class({
 
 
         // load game assets
-        this.load.image('background', 'sprites/backscroll.png')
+        this.load.image('background', 'sprites/backscroll4.png');
+        this.load.image('ground', 'sprites/ground_sand.png')
         this.load.image('raycer_cycle', 'sprites/raycer_cycle.png');
         this.load.image('raycer_cycle_L', 'sprites/raycer_cycle_L.png');
         this.load.image('raycer_cycle_R', 'sprites/raycer_cycle_R.png');
         this.load.image('rock', 'sprites/rock8.png');
-        this.load.image('scenery_tree', 'sprites/tree9.png');
+        this.load.image('bump', 'sprites/bump1.png');
+        this.load.image('atari_sign', 'sprites/wallq.png');
+
+        this.load.image('tree4', 'sprites/tree4.png');
+        this.load.image('tree5', 'sprites/tree5.png');
+        this.load.image('tree6', 'sprites/tree6.png');
+        this.load.image('tree7', 'sprites/tree7.png');
+        this.load.image('tree8', 'sprites/tree8.png');
+        this.load.image('tree9', 'sprites/tree9.png');
+
 
         //////////////////
         
@@ -448,8 +458,12 @@ var Demo = new Phaser.Class({
         this.vecTrack.push( {curvature:0.0, distance:100.0} );     // Short section for start/finish line
         this.vecTrack.push( {curvature:-0.5, distance:200.0} );
         this.vecTrack.push( {curvature:0.25, distance:200.0} );
-        this.vecTrack.push( {curvature:0.29, distance:400.0} );
+        this.vecTrack.push( {curvature:-1.0, distance:400.0} );
         this.vecTrack.push( {curvature:0.15, distance:100.0} );
+        this.vecTrack.push( {curvature:1.0, distance:200.0} );
+        this.vecTrack.push( {curvature:-0.25, distance:200.0} );
+        this.vecTrack.push( {curvature:0.9, distance:400.0} );
+        this.vecTrack.push( {curvature:-0.9, distance:100.0} );
         this.vecTrack.push( {curvature:0.3, distance:200.0} );
         
         this.vecTrack.push( {curvature:0.0, distance:200.0} );
@@ -470,25 +484,91 @@ var Demo = new Phaser.Class({
         this.GameHeight = 200;
         this.GameWidth = 320;
         
+
+
+        // ground buffer (image data for ground animation)
+        this.ground = {};
+        this.ground.srcimg = this.textures.get('ground').getSourceImage();
+        var width = this.ground.srcimg.width;
+        var height = this.ground.srcimg.height
+        this.ground.buffer = this.textures.createCanvas('groundcanvas', width, height); 
+        this.ground.context = this.ground.buffer.getContext('2d', {willReadFrequently:true});
+
+        for (var y=0; y<100; y++)
+        {
+            var _rowZ = 100 - y;
+
+            var perspective = ((_rowZ)*(_rowZ)*(_rowZ))/1100000;
+            // / (this.GameHeight/2.0);
+
+            //var perspective = y/100;
+
+            var pWidth = 320 * (perspective);
+
+            var xOffset = Math.floor((320-pWidth)*.5);
+
+            //console.log(y,_rowZ,perspective,pWidth,xOffset);
+
+            this.ground.context.drawImage(this.ground.srcimg, xOffset, y,pWidth,1,0,y,320,1);
+
+        }
+        
+
+
+        this.ground.imagedata =  this.ground.context.getImageData(0,0,width, height);
+        this.ground.pixels = this.ground.imagedata.data;
+        this.ground.buffer.refresh();
+
         // game display buffer (outputs primary game mechanic for road animation)
         this.gamedisplay = {};
-        this.gamedisplay.buffer = this.textures.createCanvas('gamedisplaycanvas', this.GameWidth, this.GameHeight); 
+        this.gamedisplay.buffer = this.textures.createCanvas('gamedisplaycanvas', this.GameWidth, this.GameHeight/2); 
         this.gamedisplay.context = this.gamedisplay.buffer.getContext('2d', {willReadFrequently:true});
+
+        //this.gamedisplay.context.drawImage(this.ground.srcimg,0,0,this.ground.srcimg.width,this.ground.srcimg.height,0,0,this.gamedisplay.buffer.width,this.gamedisplay.buffer.height);
+        
         this.gamedisplay.imagedata =  this.gamedisplay.context.getImageData(0,0,this.gamedisplay.buffer.width, this.gamedisplay.buffer.height);
         this.gamedisplay.pixels = this.gamedisplay.imagedata.data;
-
-        // init images of background, scenery, obstacles, gamedisplay, cycle sprite
+        // init images of background, ground, scenery, obstacles, gamedisplay, cycle sprite
 
         this.background_image = this.add.image(0,0,'background').setOrigin(0).setScale(1);
         this.background_arc = 0;
 
-        this.add.image(0,0,'gamedisplaycanvas').setOrigin(0).setScale(1);
-        
-        this.raycer_cycle_sprite = this.add.image(0,0,'raycer_cycle');
+        this.add.image(0,this.GameHeight/2,'gamedisplaycanvas').setOrigin(0).setScale(1).setDepth(1);
 
-        //obstacles (testing rock sprite for now)
-        this.rock_sprite = this.add.image(0,0,'rock').setVisible(false);
-        this.rock_location = {distance:1000.0, position:0.0}; // 1000 meters up, in the middle of track
+        //this.add.image(0,100,'groundcanvas').setOrigin(0).setScale(1).setDepth(201);
+        
+        this.raycer_cycle_sprite = this.add.image(0,0,'raycer_cycle').setDepth(200);
+
+        
+        //total set of road objects
+        this.road_group = this.add.group();
+        this.road_groupArray = this.road_group.getChildren();
+
+        var road_sprite; //worker just to init sprites in group
+
+        for (var i = 0; i < 20; i++)
+        {
+            road_sprite = this.add.image(0,0,'rock').setOrigin(.5,.5).setVisible(false);
+            road_sprite.label = 'rock';
+            road_sprite.location = {distance:Phaser.Math.Between(100,this.fTrackDistance), position:0.0};
+            var spriteDepth = 100 - Math.floor(100*(road_sprite.location.distance/this.fTrackDistance));
+            
+            road_sprite.setDepth(spriteDepth);
+
+            this.road_group.add(road_sprite);
+        }
+
+        for (var i = 0; i < 20; i++)
+        {
+            road_sprite = this.add.image(0,0,'bump').setOrigin(.5,.5).setVisible(false);
+            road_sprite.label = 'bump';
+            road_sprite.location = {distance:Phaser.Math.Between(100,this.fTrackDistance), position:0.0};
+            var spriteDepth = 100 - Math.floor(100*(road_sprite.location.distance/this.fTrackDistance));
+            road_sprite.setDepth(spriteDepth);
+
+            this.road_group.add(road_sprite);
+        }
+
 
         //total set of scenery objects
         this.scenery_group = this.add.group();
@@ -496,45 +576,37 @@ var Demo = new Phaser.Class({
 
         var scenery_sprite; //worker just to init sprites in group
 
-        // for (var i = 0; i < 1; i++)
-        // {
-            scenery_sprite = this.add.image(0,0,'scenery_tree').setOrigin(.5,1.0).setVisible(false);
-            scenery_sprite.label = 'scenery_firtree';
-            scenery_sprite.location = {distance:500.0, orientation:'left'};
+        for (var i = 0; i < 50; i++)
+        {
+            scenery_sprite = this.add.image(0,0,'tree'+Phaser.Math.Between(4,9)).setOrigin(.5,1.0).setVisible(false);
+            scenery_sprite.label = 'tree';
+            scenery_sprite.location = {distance:Phaser.Math.Between(100,this.fTrackDistance), orientation:'left'};
+            var spriteDepth = 100-Math.floor(100*(scenery_sprite.location.distance/this.fTrackDistance));
+            scenery_sprite.setDepth(spriteDepth);
 
             this.scenery_group.add(scenery_sprite);
 
-            scenery_sprite = this.add.image(0,0,'scenery_tree').setOrigin(.5,1.0).setVisible(false);
-            scenery_sprite.label = 'scenery_firtree';
-            scenery_sprite.location = {distance:520.0, orientation:'left'};
+            scenery_sprite = this.add.image(0,0,'tree'+Phaser.Math.Between(4,9)).setOrigin(.5,1.0).setVisible(false);
+            scenery_sprite.label = 'tree';
+            scenery_sprite.location = {distance:Phaser.Math.Between(100,2200), orientation:'right'};
+            var spriteDepth = 100 - Math.floor(100*(scenery_sprite.location.distance/this.fTrackDistance));
+            scenery_sprite.setDepth(spriteDepth);
 
             this.scenery_group.add(scenery_sprite);
 
-            scenery_sprite = this.add.image(0,0,'scenery_tree').setOrigin(.5,1.0).setVisible(false);
-            scenery_sprite.label = 'scenery_firtree';
-            scenery_sprite.location = {distance:540.0, orientation:'left'};
+            
+        }
+
+        for (var i = 0; i < 10; i++)
+        {
+            scenery_sprite = this.add.image(0,0,'atari_sign').setOrigin(0,1.0).setVisible(false);
+            scenery_sprite.label = 'atari_sign';
+            scenery_sprite.location = {distance:Phaser.Math.Between(100,2200), orientation:'right'};
+            var spriteDepth = 100 - Math.floor(100*(scenery_sprite.location.distance/this.fTrackDistance));
+            scenery_sprite.setDepth(spriteDepth);
 
             this.scenery_group.add(scenery_sprite);
-
-            scenery_sprite = this.add.image(0,0,'scenery_tree').setOrigin(.5,1.0).setVisible(false);
-            scenery_sprite.label = 'scenery_firtree';
-            scenery_sprite.location = {distance:560.0, orientation:'left'};
-
-            this.scenery_group.add(scenery_sprite);
-
-            scenery_sprite = this.add.image(0,0,'scenery_tree').setOrigin(.5,1.0).setVisible(false);
-            scenery_sprite.label = 'scenery_firtree';
-            scenery_sprite.location = {distance:580.0, orientation:'left'};
-
-            this.scenery_group.add(scenery_sprite);
-
-            scenery_sprite = this.add.image(0,0,'scenery_tree').setOrigin(.5,1.0).setVisible(false);
-            scenery_sprite.label = 'scenery_firtree';
-            scenery_sprite.location = {distance:550.0, orientation:'right'};
-
-            this.scenery_group.add(scenery_sprite);
-        // }
-
+        }
 
 
         /// keyboard input 
@@ -594,7 +666,7 @@ var Demo = new Phaser.Class({
         //instead of fElapsedTime, fSpeedFactor will scale range of throttling (which effectively represents gear shifting for lower to higher ranges of speed)
 
         //var fSpeedFactor = .0075; //1st gear
-        //var fSpeedFactor = .0145; //2nd gear
+        //var fSpeedFactor = .0125; //2nd gear
         var fSpeedFactor = .018; //3rd gear
 
         // Handle control input
@@ -730,9 +802,12 @@ var Demo = new Phaser.Class({
         this.background_image.setPosition(Math.round(this.background_arc),0);
 
         
+        // this.gamedisplay.context.clearRect(0, 0, 320, 200);
+        // this.gamedisplay.imagedata =  this.gamedisplay.context.getImageData(0,0,this.gamedisplay.buffer.width, this.gamedisplay.buffer.height);
+        // this.gamedisplay.pixels = this.gamedisplay.imagedata.data;
         
-        var lastClipColour;
-        var nClipColour;
+        // var lastClipColour;
+        // var nClipColour;
 
         // Draw Track - Each row is split into grass, clip-board and track
         for (var y = 0; y < this.GameHeight / 2; y++)
@@ -756,12 +831,13 @@ var Demo = new Phaser.Class({
                 var nRightClip = Math.round( (fMiddlePoint + fRoadWidth) * this.GameWidth );
                 var nRightGrass = Math.round( (fMiddlePoint + fRoadWidth + fClipWidth) * this.GameWidth );
                 
-                var nRow = this.GameHeight / 2 + y;
+                var nRow = y;
 
                 // Using periodic oscillatory functions to give lines, where the phase is controlled
                 // by the distance around the track. These take some fine tuning to give the right "feel"
-                var nGrassColour = Math.sin(20.0 *  Math.pow(1.0 - fPerspective, 3) + this.fDistance * 0.1) > 0.0 ? 'green' : 'darkgreen';
-                nClipColour = Math.sin(40.0 *  Math.pow(1.0 - fPerspective, 3) + this.fDistance) > 0.0 ? 'red' : 'white';
+                //var nGrassColour = Math.sin(20.0 *  Math.pow(1.0 - fPerspective, 3) + this.fDistance * 0.1) > 0.0 ? 'green' : 'darkgreen';
+                var nGrassColour = Math.sin(80.0 * Math.pow(1.0 - fPerspective, 3) + this.fDistance * .8) > 0.0 ? 'green' : 'darkgreen';
+                var nClipColour = Math.sin(40.0 *  Math.pow(1.0 - fPerspective, 3) + this.fDistance) > 0.0 ? 'red' : 'white';
                 
                 // if (nClipColour == 'red' && lastClipColour == 'white') var nRoadColour='blue'
                 //     else var nRoadColour='grey'
@@ -783,7 +859,7 @@ var Demo = new Phaser.Class({
                 if (x >= nRightGrass && x < this.GameWidth)
                     this.drawPixel(x, nRow, nGrassColour);
             }
-            lastClipColour = nClipColour;
+            //lastClipColour = nClipColour;
 
         }
         // after the pixels have been updated put the new image data into the context and refresh the buffer
@@ -821,33 +897,38 @@ var Demo = new Phaser.Class({
     
 
 
+        var thisContext=this;
+
         // Draw road sprites
-        if (this.fDistance>=this.rock_location.distance && this.fDistance<this.rock_location.distance+70)
-        {
-            this.rock_sprite.setVisible(true);
+        this.road_group.children.iterate( 
+            function(_sprite)
+            {
+                if ( _sprite.location.distance<thisContext.fDistance && _sprite.location.distance>thisContext.fDistance-60 )
+                {
+                    _sprite.setVisible(true);
 
-            var rockZ = this.fDistance-(this.rock_location.distance);
-            var rockY = ((rockZ)*(rockZ)*(rockZ))/2000;
+                    var _spriteZ = thisContext.fDistance-(_sprite.location.distance);
+                    var _spriteY = ((_spriteZ)*(_spriteZ)*(_spriteZ))/2000;
 
-            console.log(rockY);
+                    var _spritePerspective = _spriteY / (thisContext.GameHeight/2.0);
+                    var _spriteMiddlePoint = 0.5 + thisContext.fCurvature * Math.pow((1.0 - _spritePerspective), 3);
+                    var _spriteX = Math.round(_spriteMiddlePoint * thisContext.GameWidth);
+                    
+                    var nRow = thisContext.GameHeight / 2 + _spriteY;
 
-            var rockPerspective = rockY / (this.GameHeight/2.0);
-            var rockMiddlePoint = 0.5 + this.fCurvature * Math.pow((1.0 - rockPerspective), 3);
-            var rockX = Math.round(rockMiddlePoint * this.GameWidth);
-            
-            var nRow = this.GameHeight / 2 + rockY;
+                    _sprite.setPosition(_spriteX,nRow).setScale(_spritePerspective);
+                    
+                }
+                else
+                {
+                    _sprite.setVisible(false);
+                }
 
-            this.rock_sprite.setPosition(rockX,nRow).setScale(rockPerspective);
-            
-        }
-        else
-        {
-            this.rock_sprite.setVisible(false);
-        }
+            } );
+
 
 
         // Draw scenery sprites
-        var thisContext=this;
         this.scenery_group.children.iterate( 
             function(_sprite)
             { 
@@ -856,11 +937,11 @@ var Demo = new Phaser.Class({
                 // console.log(_sprite.location.distance);
                 // console.log(_sprite.location.orientation);
 
-                if ( thisContext.fDistance>=_sprite.location.distance && thisContext.fDistance<_sprite.location.distance+70 )
+                if ( _sprite.location.distance<thisContext.fDistance && _sprite.location.distance>thisContext.fDistance-60 )
                 {
                     _sprite.setVisible(true);
 
-                    var _spriteZ = thisContext.fDistance-(_sprite.location.distance);
+                    var _spriteZ = (thisContext.fDistance-(_sprite.location.distance));
 
                     var _spriteY = ((_spriteZ)*(_spriteZ)*(_spriteZ))/2000;
                     
@@ -910,14 +991,14 @@ var Demo = new Phaser.Class({
         var r,g,b;
 
         if (colorkey=='red') { r=255; g=0; b=0; }
-        if (colorkey=='green') { r=0; g=255; b=0; }
-        if (colorkey=='darkgreen') { r=20; g=200; b=20; }
+        if (colorkey=='green') { r=95; g=127; b=15; }
+        if (colorkey=='darkgreen') { r=100; g=135; b=20; }
         if (colorkey=='blue') { r=0; g=0; b=255; }
         if (colorkey=='orange') { r=255; g=255; b=0; }
         if (colorkey=='cyan') { r=0; g=255; b=255; }
         if (colorkey=='violet') { r=255; g=0; b=255; }
         if (colorkey=='white') { r=255; g=255; b=255; }
-        if (colorkey=='grey') { r=200; g=200; b=200; }
+        if (colorkey=='grey') { r=100; g=100; b=120; }
 
         var bytesPerPixel=4;
         var targetIndex=(this.gamedisplay.buffer.width*bytesPerPixel*ypos) + (bytesPerPixel*xpos);     
