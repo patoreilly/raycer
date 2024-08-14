@@ -1118,18 +1118,18 @@ var Demo = new Phaser.Class({
             } );
 
 
-        var debugt = [];
+        // var debugt = [];
                 
-                debugt.push('fps: '+ Math.floor(this.sys.game.loop.actualFps.toString()) );
-                // debugt.push('fElapsedTime: '+ fElapsedTime );
-                // debugt.push('this.fCurrentLapTime: '+ this.fCurrentLapTime );
-                debugt.push('Distance: '+ this.fDistance);
-                debugt.push('fOffset: '+ fOffset );
+        //         debugt.push('fps: '+ Math.floor(this.sys.game.loop.actualFps.toString()) );
+        //         // debugt.push('fElapsedTime: '+ fElapsedTime );
+        //         // debugt.push('this.fCurrentLapTime: '+ this.fCurrentLapTime );
+        //         debugt.push('Distance: '+ this.fDistance);
+        //         debugt.push('fOffset: '+ fOffset );
 
-                // debugt.push('touchYDelta: '+ touchYDelta );
+        //         // debugt.push('touchYDelta: '+ touchYDelta );
 
                 
-        debug.setText(debugt);
+        // debug.setText(debugt);
     },
 
     drawPixel: function(xpos,ypos,colorkey)
