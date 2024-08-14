@@ -28,7 +28,7 @@ var Menu = new Phaser.Class({
         // 'audio/miltonatmidnight.ogg',
         // 'audio/miltonatmidnight.mp3'
         // ]);
-        
+        this.load.script('jsSID', 'jsSID.js');
 
         // load gui assets
 
@@ -69,6 +69,13 @@ var Menu = new Phaser.Class({
         this.load.image('tree7', 'sprites/tree7.png');
         this.load.image('tree8', 'sprites/tree8.png');
         this.load.image('tree9', 'sprites/tree9.png');
+
+
+        for (var l = 0; l < audioList.length; l++)
+        {
+            this.load.binary(audioList[l], 'audio/'+audioList[l]);
+            //files.push(wallList[j]);
+        }
 
 
         //////////////////
@@ -176,13 +183,26 @@ var Menu = new Phaser.Class({
     
     create: function ()
     {
+
+        // access to functions belonging to other scenes in Phaser: this.scene.get
+        // use worker variable to hold the scene object accessed thru scene key
+        // i.e.
+
+        //var demo = this.scene.get('demo');
+
+        // where the worker and the key are the same name
+        // thus, 'this.myfunction()' becomes 'scenekey.myfunction()'
+
+
+
+
         startFlag=false;
+
+
+        
 
         
         //this.textures.generate('chunk3', { data: ['3'], pixelWidth: 1});
-
-        
-
         //bgimg = this.add.image(0,0,'chunk3').setAlpha(.25).setOrigin(0).setDisplaySize(320,200).setDepth(0);
 
 
@@ -262,7 +282,7 @@ var Menu = new Phaser.Class({
             
             touchActivated = false;
 
-
+            
             // music = this.sound.add('theme');
             // music.play({loop: true});
 
@@ -435,6 +455,9 @@ var Demo = new Phaser.Class({
 
     create: function ()
     {
+
+        
+
         // global
         this.globalStartTime; 
         this.newLapTimeMark;
@@ -653,9 +676,132 @@ var Demo = new Phaser.Class({
         debug = this.add.text(10, 10, '', { font: '10px Arial', fill: '#ffffff' });
         
 
+        ///sound interface
+        var tileSize = 16;
+
+        var randomKey1 = Math.random().toString();
+        var canvasFrame = this.textures.createCanvas(randomKey1, tileSize*2, tileSize);
+
+
+        var randomKey = Math.random().toString();
+        this.textures.generate(randomKey, { data: sound_off, pixelWidth: 1 });
+        
+
+        //draw the texture data for this frame into the sprite sheet
+        canvasFrame.drawFrame(randomKey,0,0,0);
+        //add the frame data for this frame into the sprite sheet
+        canvasFrame.add(0, 0, 0, 0, tileSize, tileSize);
+
+        var randomKey = Math.random().toString();
+        this.textures.generate(randomKey, { data: sound_on, pixelWidth: 1 });
+        
+
+        //draw the texture data for this frame into the sprite sheet
+        canvasFrame.drawFrame(randomKey,0,tileSize,0);
+        //add the frame data for this frame into the sprite sheet
+        canvasFrame.add(1, 0, tileSize, 0, tileSize, tileSize);
+
+        var sound_button = this.add.image(20, 20, randomKey1).setOrigin(0.5).setScale(1).setDepth(200).setInteractive();
+
+        if (sound_enabled) 
+        {
+            sound_button.setFrame(1)            
+        } 
+        else 
+        {
+            sound_button.setFrame(0)
+        }
+
+        
+
+        sound_button.on('pointerup', function () {
+
+            if (sound_enabled)
+            {
+                sound_button.setFrame(0);
+                sound_enabled=false;
+                SIDplayer.stop();
+                
+                //
+                
+                
+            }
+            else
+            {
+                sound_button.setFrame(1);
+                sound_enabled=true;
+                this.initSidAudio();
+
+                //
+
+
+            }
+
+        }, this);
+
+
+
+        this.input.gamepad.on('down', function (pad, button, index) {
+
+           if (button.index==3 && sound_enabled)
+           {
+                sound_button.setFrame(0);
+                sound_enabled=false;
+                SIDplayer.stop();
+           }
+           if (button.index==2 && !sound_enabled)
+           {
+                sound_button.setFrame(1);
+                sound_enabled=true;
+                this.initSidAudio();
+           }
+
+
+        }, this);
+
+
+        if (sound_enabled) this.initSidAudio();
     }, ////// END OF create()
 
-    
+    initSidAudio: function ()
+    {
+        // var SIDplayer = this.plugins.get('SIDPlayerPlugin');
+        // SIDplayer.loadLocal(this.cache.binary.get('tune1'));
+
+        SIDplayer = new jsSID(16384, 0.0005);
+
+        if (audioIndex>=audioList.length) {audioIndex=0}
+        
+        
+
+        SIDplayer.loadLocal(this.cache.binary.get(audioList[audioIndex]));
+
+        SIDplayer.setmodel(6581);
+
+
+
+        var i = 0;
+        var max = SIDplayer.getsubtunes();
+
+        // sidtext.setText([
+        //     'Title: ' + SIDplayer.gettitle(),
+        //     'Author: ' + SIDplayer.getauthor(),
+        //     'Info: ' + SIDplayer.getinfo(),
+        //     'Current Sub-Tune: ' + i,
+        //     'Total Sub-Tunes: ' + SIDplayer.getsubtunes(),
+        //     'Pref. Model: ' + SIDplayer.getprefmodel(),
+        //     'Playtime: ' + SIDplayer.getplaytime(),
+        //     'Playback Model: ' + SIDplayer.getmodel()
+        // ]);
+
+        SIDplayer.start(0);
+
+        
+
+        audioIndex++;
+
+        
+    },
     
     update: function()
     {
@@ -1062,7 +1208,8 @@ var j = 1.0;
 var hsv = [];
 var hsvindex=0;
 //
-
+var SIDplayer;
+var audioIndex=0;
 
 
 
@@ -1169,4 +1316,55 @@ var guideInputVerticalData = [
 ];
 
 
+var sound_off = [
+"................",
+".......2........",
+"......22........",
+".....2.2........",
+"....2..2........",
+".222...2.2....2.",
+".2.....2..2..2..",
+".2.....2...22...",
+".2.....2...22...",
+".2.....2..2..2..",
+".222...2.2....2.",
+"....2..2........",
+".....2.2........",
+"......22........",
+".......2........",
+"................"];
 
+var sound_on = [
+"................",
+".......2........",
+"......22........",
+".....2.2...2....",
+"....2..2....2...",
+".222...2.2...2..",
+".2.....2..2..2..",
+".2.....2..2..2..",
+".2.....2..2..2..",
+".2.....2..2..2..",
+".222...2.2...2..",
+"....2..2....2...",
+".....2.2...2....",
+"......22........",
+".......2........",
+"................"];
+
+var audioList = [
+'Methane_01.sid',
+'Agent_of_Lies.sid',
+'Eighties_Megahit.sid',
+'A_True_Story.sid',
+'Matrix_01.sid',
+'Gorilla.sid',
+'GULBdata.sid',
+'Long_Train_Running.sid',
+'Lumina.sid',
+'New_Blood.sid',
+'One_Must_Fall_2097.sid',
+'Glowtones.sid',
+'Holocaust_Intro.sid',
+'Jamaica_10_intro.sid'
+];
