@@ -650,7 +650,7 @@ var Demo = new Phaser.Class({
         if (touchActivated)
         {
             this.input.addPointer(1);
-            this.textures.generate('chunk', { data: ['A'], pixelWidth: 1});
+            this.textures.generate('chunk', { data: ['1'], pixelWidth: 1});
 
             guide_multi = this.add.image(280,148,'chunk').setDisplaySize(64, 64).setAlpha(.5).setDepth(200).setInteractive();
             
@@ -660,11 +660,11 @@ var Demo = new Phaser.Class({
             this.textures.generate('h_arrow', { data: guideInputHorizontalData, pixelWidth: 2});
             this.textures.generate('v_arrow', { data: guideInputVerticalData, pixelWidth: 2});
 
-            guide_left = this.add.image(260,148,'h_arrow').setAlpha(.5);
-            guide_right = this.add.image(300,148,'h_arrow').toggleFlipX().setAlpha(.5);
+            guide_left = this.add.image(260,148,'h_arrow').setAlpha(.5).setDepth(200);
+            guide_right = this.add.image(300,148,'h_arrow').toggleFlipX().setAlpha(.5).setDepth(200);
 
-            guide_up = this.add.image(280,128,'v_arrow').setAlpha(.5);
-            guide_down = this.add.image(280,168,'v_arrow').toggleFlipY().setAlpha(.5);
+            guide_up = this.add.image(280,128,'v_arrow').setAlpha(.5).setDepth(200);
+            guide_down = this.add.image(280,168,'v_arrow').toggleFlipY().setAlpha(.5).setDepth(200);
         }
         
         /// mark global start time
