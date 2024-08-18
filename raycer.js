@@ -1368,7 +1368,7 @@ var audioList = [
 'Glowtones.sid',
 'Gamma_9_Sound.sid',
 'Hearesy.sid',
-'Helikopter.sid'
+'Helikopter.sid',
 'Holocaust_Intro.sid',
 'Jamaica_10_intro.sid'
 ];
