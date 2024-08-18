@@ -1353,18 +1353,22 @@ var sound_on = [
 "................"];
 
 var audioList = [
-'Methane_01.sid',
+
 'Agent_of_Lies.sid',
 'Eighties_Megahit.sid',
 'A_True_Story.sid',
 'Matrix_01.sid',
 'Gorilla.sid',
+'Methane_01.sid',
 'GULBdata.sid',
 'Long_Train_Running.sid',
 'Lumina.sid',
 'New_Blood.sid',
 'One_Must_Fall_2097.sid',
 'Glowtones.sid',
+'Gamma_9_Sound.sid',
+'Hearesy.sid',
+'Helikopter.sid'
 'Holocaust_Intro.sid',
 'Jamaica_10_intro.sid'
 ];
