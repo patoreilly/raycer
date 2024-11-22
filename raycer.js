@@ -1,445 +1,12 @@
-
-
-var Menu = new Phaser.Class({
+var Raycer = new Phaser.Class({
 
     Extends: Phaser.Scene,
 
     initialize:
 
-    function Menu ()
+    function Raycer ()
     {
-        Phaser.Scene.call(this, 'menu');
-    },
-    init: function (data)
-    {
-        
-    },
-
-    preload: function ()
-    {
-        // // load audio assets
-
-        // this.load.audioSprite('sfx', 'audio/horizon6_sounds.json', [
-        // 'audio/horizon6_sounds.ogg',
-        // 'audio/horizon6_sounds.mp3'
-        // ]);
-
-        // this.load.audio('theme', [
-        // 'audio/miltonatmidnight.ogg',
-        // 'audio/miltonatmidnight.mp3'
-        // ]);
-        this.load.script('jsSID', 'jsSID.js');
-
-        // load gui assets
-
-        // this.load.image('Hat Trick Hero', 'gui/Hat Trick Hero 95 (modified_sm).png');
-
-        // this.load.image('dragonfly_title', 'gui/dragonfly_title.png');
-
-        this.load.spritesheet('flybug', 'gui/fly1_sheet1.png',{ frameWidth: 52, frameHeight: 34 });
-
-        this.load.image('Afterburner', 'gui/Afterburner (Sega).png');
-
-        // this.load.image('Major Title', 'gui/Major Title (IREM).png');
-
-        this.load.image('load_scrn_bkgd', 'gui/super-cycle_3.gif');
-
-        ///// testing
-        this.load.image('Nintendo', 'gui/Super Mario Bros 3 (Nintendo).png');
-        //////
-
-        this.load.image('mousekeys_icon', 'gui/mousekeys_icon.png');
-        this.load.image('touch_icon', 'gui/touch_icon.png');
-        this.load.image('gamepad_icon', 'gui/gamepad_icon.png');        
-
-
-        // load game assets
-        this.load.image('background', 'sprites/backscroll4.png');
-        this.load.image('ground', 'sprites/ground_sand.png')
-        this.load.image('raycer_cycle', 'sprites/raycer_cycle.png');
-        this.load.image('raycer_cycle_L', 'sprites/raycer_cycle_L.png');
-        this.load.image('raycer_cycle_R', 'sprites/raycer_cycle_R.png');
-        this.load.image('rock', 'sprites/rock8.png');
-        this.load.image('bump', 'sprites/bump1.png');
-        this.load.image('atari_sign', 'sprites/wallq.png');
-
-        this.load.image('tree4', 'sprites/tree4.png');
-        this.load.image('tree5', 'sprites/tree5.png');
-        this.load.image('tree6', 'sprites/tree6.png');
-        this.load.image('tree7', 'sprites/tree7.png');
-        this.load.image('tree8', 'sprites/tree8.png');
-        this.load.image('tree9', 'sprites/tree9.png');
-
-
-        for (var l = 0; l < audioList.length; l++)
-        {
-            this.load.binary(audioList[l], 'audio/'+audioList[l]);
-            //files.push(wallList[j]);
-        }
-
-
-        //////////////////
-        
-        loadfile_index = 0;
-
-        var progress = this.add.graphics().setDepth(99);
-
-        var text = this.add.text(10, 50, '(debug text)', { font: '10px Courier', fill: '#ffffff' }).setDepth(99);
-        var text2 = this.add.text(10, 72, '(debug text)', { font: '10px Courier', fill: '#ffffff' }).setDepth(99);
-        
-
-        this.load.on('progress', function (value) {
-            text.setText('loading...'+Math.floor(100*value)+'%');
-            progress.clear();
-            progress.fillStyle(0x33ff04, 1);
-            progress.fillRect(0, 40, 320 * value, 10);
-        });
-        
-        this.load.on('fileprogress', function (file,value) {
-            //text.setText(Math.floor(100*value)+'%');          
-            text2.setText(file.key);            
-            // text3.setText(value);
-            // progress.clear();
-            // progress.fillStyle(0x00cc11, 1);
-            // progress.fillRect(0, 0, 320 * value, 5);            
-        });
-
-        this.load.on('filecomplete', this.showFile, this);
-
-        this.load.on('complete', function () {
-
-            progress.destroy();            
-            text.destroy();
-            text2.destroy();
-            for (var e=0; e<file_thumbs.length; e++)
-            {
-                file_thumbs[e].destroy();
-            }
-            
-
-        });
-
-    },
-
-
-    showFile: function (key, type, texture)
-    {
-        file_thumbs[loadfile_index] = this.add.image(10+20*(loadfile_index%16), 100+20*(Math.floor(loadfile_index/16)), key).setDisplaySize(20, 20);
-        
-
-        
-        loadfile_index++;
-
-        if (key=='load_scrn_bkgd')
-        {
-            this.add.image(0, 0, key).setOrigin(0).setDisplaySize(320, 200);
-        }
-
-        if (key=='Nintendo')
-        {
-            var config3 = {
-            image: 'Nintendo',
-            width: 8,
-            height: 8,
-            chars: Phaser.GameObjects.RetroFont.TEXT_SET1,
-            charsPerRow: 96,
-            spacing: { x: 0, y: 0 },
-            offset: {y:0}
-            };
-
-            this.cache.bitmapFont.add('ab_headtext', Phaser.GameObjects.RetroFont.Parse(this, config3));
-
-            hsv = Phaser.Display.Color.HSVColorWheel();
-
-            var text0 = this.add.dynamicBitmapText(0, 0, 'ab_headtext', 'DragonFLY').setOrigin(0).setScale(1).setPosition(4,4).setDepth(200);
-            var text1 = this.add.dynamicBitmapText(0, 0, 'ab_headtext', '          Engine').setOrigin(0).setScale(1).setPosition(4,4).setDepth(200);
-            var text2 = this.add.dynamicBitmapText(0, 0, 'ab_headtext', 'v 0.4 demo').setOrigin(0).setScale(1).setPosition(4,14).setDepth(200);
-
-            text0.setDisplayCallback(this.textCallback);
-        } 
-    },
-
-    textCallback: function (data) 
-    {
-
-
-        data.tint.topLeft = hsv[Math.floor(i)].color;
-        
-
-        i += 0.5;
-
-        if (i >= hsv.length)
-        {
-            i = 0;
-        }
-        // data.parent.alpha -= .0005;
-        // if (data.parent.alpha<.5) data.parent.alpha=1.0;
-        //console.log(data);
-        
-
-        return data;
-    },
-    
-    
-    create: function ()
-    {
-
-        // access to functions belonging to other scenes in Phaser: this.scene.get
-        // use worker variable to hold the scene object accessed thru scene key
-        // i.e.
-
-        //var demo = this.scene.get('demo');
-
-        // where the worker and the key are the same name
-        // thus, 'this.myfunction()' becomes 'scenekey.myfunction()'
-
-
-
-
-        startFlag=false;
-
-
-        
-
-        
-        //this.textures.generate('chunk3', { data: ['3'], pixelWidth: 1});
-        //bgimg = this.add.image(0,0,'chunk3').setAlpha(.25).setOrigin(0).setDisplaySize(320,200).setDepth(0);
-
-
-        //  animated sprite set up for 2d display purpose 
-            //  must be loaded as .spritesheet with frame params and added as .sprite
-            var randomKey3 = Math.random().toString();
-
-            this.anims.create({
-                key: randomKey3,
-                frames: this.anims.generateFrameNumbers('flybug'),
-                frameRate: 60,
-                repeat: -1
-                //yoyo: true
-            });
-
-        
-            var flysprite = this.add.sprite(280, 10, 'flybug').play(randomKey3).setOrigin(0).setScale(.5);
-
-            this.tweens.add({
-                targets: flysprite,
-                y: 30,
-                ease: 'Sine.easeInOut',
-                duration: 600,
-                yoyo: true,
-                repeat: -1
-            });
-
-       
-
-        var config2 = {
-            image: 'Afterburner',
-            width: 8,
-            height: 8,
-            chars: Phaser.GameObjects.RetroFont.TEXT_SET1,
-            charsPerRow: 96,
-            spacing: { x: 0, y: 0 },
-            lineSpacing: 8,
-            offset: {y:40}
-        };
-
-        var config1 = {
-            image: 'Afterburner',
-            width: 8,
-            height: 8,
-            chars: Phaser.GameObjects.RetroFont.TEXT_SET1,
-            charsPerRow: 96,
-            spacing: { x: 0, y: 0 },
-            lineSpacing: 8,
-            offset: {y:24}
-        };
-
-        this.cache.bitmapFont.add('Afterburner', Phaser.GameObjects.RetroFont.Parse(this, config2));
-        this.cache.bitmapFont.add('Afterburner1', Phaser.GameObjects.RetroFont.Parse(this, config1));
-
-        var text1 = this.add.dynamicBitmapText(0, 0, 'Afterburner', " keyboard mouse \n ").setOrigin(0.5).setScale(1).setCenterAlign().setPosition(160,60).setDepth(100);
-        var text2 = this.add.dynamicBitmapText(0, 0, 'Afterburner1', " touchscreen \n ").setOrigin(0.5).setScale(1).setCenterAlign().setPosition(160,110).setDepth(100);
-        var text3 = this.add.dynamicBitmapText(0, 0, 'Afterburner', " gamepad \n ").setOrigin(0.5).setScale(1).setCenterAlign().setPosition(160,160).setDepth(100);
-        
-         
-        
-        var hitarea1 = this.add.rectangle(text1.x, text1.y, text1.width + 20, text1.height + 16, 0x00ff00, 0.45).setInteractive();
-        var hitarea2 = this.add.rectangle(text2.x, text2.y, text2.width + 20, text2.height + 16, 0xff00ff, 0.45).setInteractive();
-        var hitarea3 = this.add.rectangle(text3.x, text3.y, text3.width + 20, text3.height + 16, 0x00ffff, 0.45).setInteractive();
-
-        this.add.sprite(160, 60, 'mousekeys_icon').setOrigin(.5,0).setScale(1);   
-        this.add.sprite(160, 110, 'touch_icon').setOrigin(.5,0).setScale(1);   
-        this.add.sprite(160, 160, 'gamepad_icon').setOrigin(.5,0).setScale(1);  
-
-
-        hitarea1.on('pointerup', function () {
-             
-            sound_enabled = true;
-
-            //this.scale.startFullscreen();
-
-            //screen.orientation.lock('landscape');
-            
-            touchActivated = false;
-
-            
-            // music = this.sound.add('theme');
-            // music.play({loop: true});
-
-            this.add.dynamicBitmapText(0, 0, 'Afterburner1', 'getting ready..').setOrigin(0.5).setScale(2).setCenterAlign().setPosition(160,100).setDepth(100);
-            startFlag=true;//this.scene.start('demo');
-            
-
-        }, this);
-
-        hitarea2.on('pointerup', function () {
-
-            sound_enabled = true;
-
-            this.scale.startFullscreen();
-
-            screen.orientation.lock('landscape');
-            
-            touchActivated = true;
-
-            // music = this.sound.add('theme');
-            // music.play({loop: true});
-
-            this.add.dynamicBitmapText(0, 0, 'Afterburner1', 'getting ready..').setOrigin(0.5).setScale(2).setCenterAlign().setPosition(160,100).setDepth(100);
-            startFlag=true;//this.scene.start('demo');
-            
-
-        }, this);
-
-        hitarea3.on('pointerup', function () {
-
-            sound_enabled = true;
-
-            //this.scale.startFullscreen();
-
-            //screen.orientation.lock('landscape');
-            
-            touchActivated = false;
-
-            // music = this.sound.add('theme');
-            // music.play({loop: true});
-
-            this.add.dynamicBitmapText(0, 0, 'Afterburner1', 'getting ready..').setOrigin(0.5).setScale(2).setCenterAlign().setPosition(160,100).setDepth(100);
-            startFlag=true;//this.scene.start('demo');
-            
-
-        }, this);
-
-        
-        this.input.gamepad.once('down', function (pad, button, index) {
-
-        //text_gamepad.setText('Playing with ' + pad.id + ' index: ' + pad.index);
-
-        pad.setAxisThreshold(0.3);
-
-        gamepad = pad;
-
-        sound_enabled = true;
-
-        //this.scale.startFullscreen();
-
-        touchActivated = false;
-
-
-        // music = this.sound.add('theme');
-        // music.play({loop: true});
-
-        
-
-        this.add.dynamicBitmapText(0, 0, 'Afterburner1', 'getting ready..').setOrigin(0.5).setScale(2).setCenterAlign().setPosition(160,100).setDepth(100);
-        startFlag=true;//this.scene.start('demo');
-
-        }, this);
-
-
-        
-        text5 = this.add.dynamicBitmapText(0, 0, 'ab_headtext', 'no gamepad detected').setOrigin(0).setScale(1).setPosition(320,190).setDepth(200);
-
-        this.tweens.add({
-            targets: text5,
-            x: -320,
-            ease: 'none',
-            duration: 4000,
-            yoyo: false,
-            repeat: -1
-        });
-        
-        
-
-        
-
-        this.events.on('shutdown', this.shutdown, this);
-    },
-
-    shutdown: function ()
-    {
-
-        //  We need to clear keyboard events, or they'll stack up when the Menu is re-run
-        this.input.keyboard.shutdown();
-    },
-    update: function ()
-    {
-        
-
-
-
-        if (startFlag)
-        {
-            this.scene.start('demo');
-        }        
-        else if (this.input.gamepad.total === 0)// exit update loop if no gamepad detected
-        {
-            return;
-        }
-
-        
-
-
-        
-        var pads = this.input.gamepad.gamepads;
-        var pad;
-
-        for (var i = 0; i < pads.length; i++)
-        {
-            pad = pads[i];
-
-            if (!pad)
-            {
-                continue;
-            }
-            else
-            {
-                text5.setText('gamepad detected press any button '+pad.id );
-            }
-        }
-        
-        
-
-        
-
-
-        
-        
-
-    }
-
-});
-
-
-var Demo = new Phaser.Class({
-
-    Extends: Phaser.Scene,
-
-    initialize:
-
-    function Demo ()
-    {
-        Phaser.Scene.call(this, { key: 'demo' });
+        Phaser.Scene.call(this, { key: 'raycer', active: false });
     },
 
     init: function (data)
@@ -635,7 +202,9 @@ var Demo = new Phaser.Class({
         /// keyboard input 
         cursors = this.input.keyboard.createCursorKeys();
 
-        /// activates gamepad in this scene
+        
+
+        // activates gamepad in this scene
 
         this.input.gamepad.once('down', function (pad, button, index) {
 
@@ -644,28 +213,6 @@ var Demo = new Phaser.Class({
         gamepad = pad;
 
         }, this);
-
-
-        /// touch input gui
-        if (touchActivated)
-        {
-            this.input.addPointer(1);
-            this.textures.generate('chunk', { data: ['1'], pixelWidth: 1});
-
-            guide_multi = this.add.image(280,148,'chunk').setDisplaySize(64, 64).setAlpha(.5).setDepth(200).setInteractive();
-            
-            guide_multi.on('pointermove', function () {gTouching = true}, this);
-            guide_multi.on('pointerout', function () {gTouching = false; guiLeft = false; guiRight = false; guiUp = false}, this);
-
-            this.textures.generate('h_arrow', { data: guideInputHorizontalData, pixelWidth: 2});
-            this.textures.generate('v_arrow', { data: guideInputVerticalData, pixelWidth: 2});
-
-            guide_left = this.add.image(260,148,'h_arrow').setAlpha(.5).setDepth(200);
-            guide_right = this.add.image(300,148,'h_arrow').toggleFlipX().setAlpha(.5).setDepth(200);
-
-            guide_up = this.add.image(280,128,'v_arrow').setAlpha(.5).setDepth(200);
-            guide_down = this.add.image(280,168,'v_arrow').toggleFlipY().setAlpha(.5).setDepth(200);
-        }
         
         /// mark global start time
 
@@ -676,136 +223,26 @@ var Demo = new Phaser.Class({
         debug = this.add.text(10, 10, '', { font: '10px Arial', fill: '#ffffff' });
         
 
-        ///sound interface
-        var tileSize = 16;
-
-        var randomKey1 = Math.random().toString();
-        var canvasFrame = this.textures.createCanvas(randomKey1, tileSize*2, tileSize);
-
-
-        var randomKey = Math.random().toString();
-        this.textures.generate(randomKey, { data: sound_off, pixelWidth: 1 });
         
-
-        //draw the texture data for this frame into the sprite sheet
-        canvasFrame.drawFrame(randomKey,0,0,0);
-        //add the frame data for this frame into the sprite sheet
-        canvasFrame.add(0, 0, 0, 0, tileSize, tileSize);
-
-        var randomKey = Math.random().toString();
-        this.textures.generate(randomKey, { data: sound_on, pixelWidth: 1 });
-        
-
-        //draw the texture data for this frame into the sprite sheet
-        canvasFrame.drawFrame(randomKey,0,tileSize,0);
-        //add the frame data for this frame into the sprite sheet
-        canvasFrame.add(1, 0, tileSize, 0, tileSize, tileSize);
-
-        var sound_button = this.add.image(20, 20, randomKey1).setOrigin(0.5).setScale(1).setDepth(200).setInteractive();
-
-        if (sound_enabled) 
+        /// launch touch input gui
+        if (touchActivated)
         {
-            sound_button.setFrame(1)            
-        } 
-        else 
-        {
-            sound_button.setFrame(0)
+            this.scene.launch('touchgui');
         }
-
         
-
-        sound_button.on('pointerup', function () {
-
-            if (sound_enabled)
-            {
-                sound_button.setFrame(0);
-                sound_enabled=false;
-                SIDplayer.stop();
-                
-                //
-                
-                
-            }
-            else
-            {
-                sound_button.setFrame(1);
-                sound_enabled=true;
-                this.initSidAudio();
-
-                //
-
-
-            }
-
-        }, this);
+        /// launch menus and title
+        this.scene.launch('menus');
+        this.scene.launch('title');
 
 
 
-        this.input.gamepad.on('down', function (pad, button, index) {
-
-           if (button.index==3 && sound_enabled)
-           {
-                sound_button.setFrame(0);
-                sound_enabled=false;
-                SIDplayer.stop();
-           }
-           if (button.index==2 && !sound_enabled)
-           {
-                sound_button.setFrame(1);
-                sound_enabled=true;
-                this.initSidAudio();
-           }
-
-
-        }, this);
-
-
-        if (sound_enabled) this.initSidAudio();
     }, ////// END OF create()
 
-    initSidAudio: function ()
-    {
-        // var SIDplayer = this.plugins.get('SIDPlayerPlugin');
-        // SIDplayer.loadLocal(this.cache.binary.get('tune1'));
-
-        SIDplayer = new jsSID(16384, 0.0005);
-
-        if (audioIndex>=audioList.length) {audioIndex=0}
-        
-        
-
-        SIDplayer.loadLocal(this.cache.binary.get(audioList[audioIndex]));
-
-        SIDplayer.setmodel(6581);
-
-
-
-        var i = 0;
-        var max = SIDplayer.getsubtunes();
-
-        // sidtext.setText([
-        //     'Title: ' + SIDplayer.gettitle(),
-        //     'Author: ' + SIDplayer.getauthor(),
-        //     'Info: ' + SIDplayer.getinfo(),
-        //     'Current Sub-Tune: ' + i,
-        //     'Total Sub-Tunes: ' + SIDplayer.getsubtunes(),
-        //     'Pref. Model: ' + SIDplayer.getprefmodel(),
-        //     'Playtime: ' + SIDplayer.getplaytime(),
-        //     'Playback Model: ' + SIDplayer.getmodel()
-        // ]);
-
-        SIDplayer.start(0);
-
-        
-
-        audioIndex++;
-
-        
-    },
+    
     
     update: function()
     {
-
+        if (menu_mode) {this.scene.setActive(false, 'raycer')}
         
         var fElapsedTime = (game.loop.now - this.globalStartTime)/1000;
 
@@ -813,74 +250,46 @@ var Demo = new Phaser.Class({
 
         //var fSpeedFactor = .0075; //1st gear
         //var fSpeedFactor = .0125; //2nd gear
-        var fSpeedFactor = .018; //3rd gear
+        var fSpeedFactor = .025; //3rd gear
 
         // Handle control input
         var nCarDirection = 0;
-
-
-        if (!gamepad)
-        {
-            
-
-            if (gTouching)
-            {
-                var touchXDelta = (guide_multi.input.localX-.5);
-                var touchYDelta = (guide_multi.input.localY-.5);
-
-                if (touchXDelta<-.25) guiLeft=true
-                    else guiLeft=false;
-                if (touchXDelta>.25) guiRight=true
-                    else guiRight=false;
-                if (touchYDelta<-.25) guiUp=true
-                    else guiUp=false;
-            }
-            
-
-            if (cursors.up.isDown || guiUp)
-                this.fSpeed += 2.0 * fSpeedFactor;
-            else
-                this.fSpeed -= 1.0 * fSpeedFactor;
-
-            // Car Curvature is accumulated left/right input, but inversely proportional to speed
-            // i.e. it is harder to turn at high speed
-            if (cursors.left.isDown || guiLeft)
-            {
-                this.fPlayerCurvature -= 2.0 * fSpeedFactor * (1.0 - this.fSpeed / 2.0);
-                nCarDirection = -1;
-            }
-
-            if (cursors.right.isDown || guiRight)
-            {
-                this.fPlayerCurvature += 2.0 * fSpeedFactor * (1.0 - this.fSpeed / 2.0);
-                nCarDirection = +1;
-            }
-        }
-            
-        else
-        {
-            if (gamepad.up)
-                this.fSpeed += 2.0 * fSpeedFactor;
-            else
-                this.fSpeed -= 1.0 * fSpeedFactor;
-
-            // Car Curvature is accumulated left/right input, but inversely proportional to speed
-            // i.e. it is harder to turn at high speed
-            if (gamepad.left)
-            {
-                this.fPlayerCurvature -= 2.0 * fSpeedFactor * (1.0 - this.fSpeed / 2.0);
-                nCarDirection = -1;
-            }
-
-            if (gamepad.right)
-            {
-                this.fPlayerCurvature += 2.0 * fSpeedFactor * (1.0 - this.fSpeed / 2.0);
-                nCarDirection = +1;
-            }            
-        }
-
         
 
+        //player control input handlers
+        if (gTouching)
+        {
+            var touchXDelta = (guide_multi.input.localX-.5);
+            var touchYDelta = (guide_multi.input.localY-.5);
+
+            if (touchXDelta<-.25) guiLeft=true
+                else guiLeft=false;
+            if (touchXDelta>.25) guiRight=true
+                else guiRight=false;
+            if (touchYDelta<-.25) guiUp=true
+                else guiUp=false;
+        }
+        
+
+        if (cursors.up.isDown || guiUp || gamepad.up)
+            this.fSpeed += 2.0 * fSpeedFactor;
+        else
+            this.fSpeed -= 1.0 * fSpeedFactor;
+
+        // Car Curvature is accumulated left/right input, but inversely proportional to speed
+        // i.e. it is harder to turn at high speed
+        if (cursors.left.isDown || guiLeft || gamepad.left)
+        {
+            this.fPlayerCurvature -= 2.0 * fSpeedFactor * (1.0 - this.fSpeed / 2.0);
+            nCarDirection = -1;
+        }
+
+        if (cursors.right.isDown || guiRight || gamepad.right)
+        {
+            this.fPlayerCurvature += 2.0 * fSpeedFactor * (1.0 - this.fSpeed / 2.0);
+            nCarDirection = +1;
+        }
+        //end player control
 
 
         // If car curvature is too different to track curvature, slow down
@@ -1159,216 +568,3 @@ var Demo = new Phaser.Class({
 });
 
 
-
-var config = {
-    type: Phaser.WEBGL,
-    parent: 'phaser-example',
-    width: 320,
-    height: 200,
-    transparent: true,
-    roundPixels: true,
-    pixelArt: true,
-    physics: {
-        default: 'arcade',
-        arcade: {
-            //gravity: { y: 0 },
-            debug: false
-        }
-    },
-
-    input: {
-        gamepad: true
-    },
-    scale: {
-        mode: Phaser.Scale.EXACT,
-        parent: 'phaser-example',
-        autoCenter: Phaser.Scale.CENTER_BOTH,
-        width: 320,
-        height: 200
-    },
-    audio: {
-        disableWebAudio: true
-    },
-    scene: [Menu, Demo]
-};
-
-var game = new Phaser.Game(config);
-
-var debug;
-
-var file_thumbs = [];
-var allImageKeys = [];
-
-var sound_enabled;
-var music;
-
-//for textcallback
-var i = 0;
-var j = 1.0; 
-var hsv = [];
-var hsvindex=0;
-//
-var SIDplayer;
-var audioIndex=0;
-
-
-
-
-
-
-
-
-var audioIndex=0;
-var touchActivated=false;
-var gamepad=false;
-var soundfx_enabled = false;
-
-var keys;
-var cursors;
-
-var palette_raycer = {
-
-    0: '#FFFFFF', //white
-    1: '#FCDD09', //yellow
-    2: '#EB7710', //orange
-    3: '#DA131A', //red
-    4: '#732C64', //purple
-    5: '#1047AE', //blue
-    6: '#07892F', //darkgreen
-    7: '#00FF00', //brightgreen
-    8: '#999999'  //grey
-};
-                            
-var guide_multi_activeY;
-var guide_multi;
-var guide_zspeed;
-var guide_left;
-var guide_right;
-var guide_forward;
-var guide_back;
-var guide_up;
-var guide_down;
-
-var gTouching = false;
-var guiLeft = false;
-var guiRight = false;
-var guiForward = false;
-var guiBack = false;
-var guiUp = false;
-var guiDown = false;
-
-var accessMenuData = [
-"................",
-"................",
-"................",
-"..222222222222..",
-"..222222222222..",
-"................",
-"................",
-"..222222222222..",
-"..222222222222..",
-"................",
-"................",
-"..222222222222..",
-"..222222222222..",
-"................",
-"................",
-"................"
-];
-
-var guideInputHorizontalData = [
-".........22.....",
-"........222.....",
-".......2222.....",
-"......22222.....",
-".....222222.....",
-"....2222222.....",
-"...22222222.....",
-"..222222222.....",
-"..222222222.....",
-"...22222222.....",
-"....2222222.....",
-".....222222.....",
-"......22222.....",
-".......2222.....",
-"........222.....",
-".........22....."
-];
-
-
-var guideInputVerticalData = [
-"................",
-"................",
-".......22.......",
-"......2222......",
-".....222222.....",
-"....22222222....",
-"...2222222222...",
-"..222222222222..",
-".22222222222222.",
-"2222222222222222",
-"2222222222222222",
-"................",
-"................",
-"................",
-"................",
-"................"
-];
-
-
-var sound_off = [
-"................",
-".......2........",
-"......22........",
-".....2.2........",
-"....2..2........",
-".222...2.2....2.",
-".2.....2..2..2..",
-".2.....2...22...",
-".2.....2...22...",
-".2.....2..2..2..",
-".222...2.2....2.",
-"....2..2........",
-".....2.2........",
-"......22........",
-".......2........",
-"................"];
-
-var sound_on = [
-"................",
-".......2........",
-"......22........",
-".....2.2...2....",
-"....2..2....2...",
-".222...2.2...2..",
-".2.....2..2..2..",
-".2.....2..2..2..",
-".2.....2..2..2..",
-".2.....2..2..2..",
-".222...2.2...2..",
-"....2..2....2...",
-".....2.2...2....",
-"......22........",
-".......2........",
-"................"];
-
-var audioList = [
-
-'Agent_of_Lies.sid',
-'Eighties_Megahit.sid',
-'A_True_Story.sid',
-'Matrix_01.sid',
-'Gorilla.sid',
-'Methane_01.sid',
-'GULBdata.sid',
-'Long_Train_Running.sid',
-'Lumina.sid',
-'New_Blood.sid',
-'One_Must_Fall_2097.sid',
-'Glowtones.sid',
-'Gamma_9_Sound.sid',
-'Hearesy.sid',
-'Helikopter.sid',
-'Holocaust_Intro.sid',
-'Jamaica_10_intro.sid'
-];
