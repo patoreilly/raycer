@@ -27,7 +27,7 @@ var config = {
     audio: {
         disableWebAudio: true
     },
-    scene: [Setup, Raycer, Menus, Touchgui, Title]
+    scene: [Setup, Raycer, Hud, Menus, Touchgui, About, Title ]
 };
 
 var game = new Phaser.Game(config);

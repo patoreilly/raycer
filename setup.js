@@ -58,7 +58,11 @@ var Setup = new Phaser.Class({
 
 
         // load game assets
-        this.load.image('background', 'sprites/backscroll4.png');
+        this.load.image('background0', 'sprites/backscroll0.png');
+        this.load.image('background1', 'sprites/backscroll1.png');
+        this.load.image('background2', 'sprites/backscroll2.png');
+        this.load.image('background3', 'sprites/backscroll3.png');
+
         this.load.image('ground', 'sprites/ground_sand.png')
         this.load.image('raycer_cycle', 'sprites/raycer_cycle.png');
         this.load.image('raycer_cycle_L', 'sprites/raycer_cycle_L.png');
@@ -67,12 +71,41 @@ var Setup = new Phaser.Class({
         this.load.image('bump', 'sprites/bump1.png');
         this.load.image('atari_sign', 'sprites/wallq.png');
 
+        this.load.image('rock1', 'sprites/rock1.png');
+        this.load.image('rock2', 'sprites/rock2.png');
+        this.load.image('rock3', 'sprites/rock3.png');
+        this.load.image('rock4', 'sprites/rock4.png');
+        
+        this.load.image('plant3', 'sprites/plant3.png');
+        this.load.image('plant4', 'sprites/plant4.png');
+        this.load.image('plant5', 'sprites/plant5.png');
+        this.load.image('plant6', 'sprites/plant6.png');
+        
+        this.load.image('fern1', 'sprites/fern1.png');
+        this.load.image('fern2', 'sprites/fern2.png');
+        this.load.image('fern3', 'sprites/fern3.png');
+        this.load.image('fern4', 'sprites/fern4.png');
+        this.load.image('fern5', 'sprites/fern5.png');
+        this.load.image('fern6', 'sprites/fern6.png');
+        this.load.image('fern7', 'sprites/fern7.png');
+        this.load.image('fern8', 'sprites/fern8.png');
+
         this.load.image('tree4', 'sprites/tree4.png');
         this.load.image('tree5', 'sprites/tree5.png');
         this.load.image('tree6', 'sprites/tree6.png');
         this.load.image('tree7', 'sprites/tree7.png');
-        this.load.image('tree8', 'sprites/tree8.png');
+        this.load.image('tree8', 'sprites/tree8.png');        
         this.load.image('tree9', 'sprites/tree9.png');
+
+
+
+        this.load.image('tree13', 'sprites/tree13.png');
+        this.load.image('tree14', 'sprites/tree14.png');
+        this.load.image('tree15', 'sprites/tree15.png');
+        this.load.image('tree16', 'sprites/tree16.png');
+        
+        
+        
 
 
         for (var l = 0; l < audioList.length; l++)

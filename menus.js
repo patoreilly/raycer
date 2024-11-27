@@ -99,7 +99,7 @@ var Menus = new Phaser.Class({
         //add the frame data for this frame into the sprite sheet
         canvasFrame.add(1, 0, tileSize, 0, tileSize, tileSize);
 
-        var sound_button = this.add.image(20, 20, randomKey1).setOrigin(0.5).setScale(1).setDepth(200).setInteractive();
+        var sound_button = this.add.image(10, 10, randomKey1).setOrigin(0.5).setScale(1).setDepth(200).setInteractive();
 
         if (sound_enabled) 
         {
@@ -158,6 +158,7 @@ var Menus = new Phaser.Class({
             if (button.index==4)
             {
                 this.displayHideMenu();
+                this.scene.setVisible(false, 'about');
             }
             if (button.index==12)
             {
@@ -195,7 +196,7 @@ var Menus = new Phaser.Class({
         this.menu[0] = {};
 
         
-        this.menu[0].items = ['NEW GAME','OPTIONS','DEMO'];
+        this.menu[0].items = ['NEW GAME','OPTIONS','DEMO','ABOUT'];
         this.menu[0].buttons = [];
                
         //options menu
@@ -240,8 +241,9 @@ var Menus = new Phaser.Class({
 
                     button.setFont('Menu_Rollover');
 
-                    //un-hilite all other menu buttons
+                    //reset current_index and un-hilite all other menu buttons
                     var thisbuttonindex = button.getData('index');
+                    menus.current_index = thisbuttonindex;
 
                     for (var i=0;i<menus.menu[menus.current_menu].buttons.length;i++)
                     {
@@ -326,6 +328,9 @@ var Menus = new Phaser.Class({
                 menu_mode = true;
 
                 this.scene.setActive(false, 'raycer');
+
+                
+
                 title.showTitleTween();
 
                 menu1_cont.visible = true;
@@ -371,6 +376,9 @@ var Menus = new Phaser.Class({
                 menu_mode = false;
                 
                 this.scene.setActive(true, 'raycer');
+
+                
+
                 title.hideTitleTween();
             
                 this.hideMenuTween.play();
@@ -394,7 +402,7 @@ var Menus = new Phaser.Class({
 
     processMenuSelection: function(selected_index)
     {
-
+        
         if (menu1_cont.visible)
         {
             
@@ -402,6 +410,7 @@ var Menus = new Phaser.Class({
             {
             case 0:
                 this.displayHideMenu();
+                this.startNewGame();
                 break;
 
             case 1:
@@ -422,7 +431,14 @@ var Menus = new Phaser.Class({
                 break;
 
             case 2:
-                
+                this.displayHideMenu();
+                this.startDemo();
+                break;
+
+            case 3:
+                this.displayHideMenu();
+                this.scene.launch('about');
+
                 break;
 
 
@@ -453,12 +469,27 @@ var Menus = new Phaser.Class({
 
     },
 
+    startNewGame: function()
+    {
+        var raycer = this.scene.get('raycer');
+        raycer.raycer_mode='game';
+        this.scene.launch('hud');
+    },
+    startDemo: function()
+    {
+        var raycer = this.scene.get('raycer');
+        raycer.raycer_mode='demo';
+        this.scene.launch('hud');
+
+    },
+
     update: function()
     {
         
         if (Phaser.Input.Keyboard.JustDown(this.escape_key))
         {
             this.displayHideMenu();
+            this.scene.setVisible(false, 'about');
         }
 
         if (Phaser.Input.Keyboard.JustDown(this.enter_key))
@@ -488,19 +519,19 @@ var Menus = new Phaser.Class({
         
         
 
-        var debugt = [];
+        // var debugt = [];
                 
-                debugt.push('this.current_index: '+ this.current_index );
-                debugt.push('fps: '+ Math.floor(this.sys.game.loop.actualFps.toString()) );
-                // debugt.push('fElapsedTime: '+ fElapsedTime );
-                // debugt.push('this.fCurrentLapTime: '+ this.fCurrentLapTime );
-                // debugt.push('Distance: '+ this.fDistance);
-                // debugt.push('fOffset: '+ fOffset );
+        //         debugt.push('this.current_index: '+ this.current_index );
+        //         debugt.push('fps: '+ Math.floor(this.sys.game.loop.actualFps.toString()) );
+        //         // debugt.push('fElapsedTime: '+ fElapsedTime );
+        //         // debugt.push('this.fCurrentLapTime: '+ this.fCurrentLapTime );
+        //         // debugt.push('Distance: '+ this.fDistance);
+        //         // debugt.push('fOffset: '+ fOffset );
 
-                // debugt.push('touchYDelta: '+ touchYDelta );
+        //         // debugt.push('touchYDelta: '+ touchYDelta );
 
                 
-        debug.setText(debugt);
+        // debug.setText(debugt);
     },
 
     initSidAudio: function ()

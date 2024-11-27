@@ -42,7 +42,7 @@ var Touchgui = new Phaser.Class({
 
         this.textures.generate('a_menu', { data: accessMenuData, pixelWidth: 1});
         access_menu = this.add.image(310,10,'a_menu').setAlpha(1).setInteractive();
-        access_menu.on('pointerdown', function () { var menus = this.scene.get('menus'); menus.displayHideMenu(); } , this);
+        access_menu.on('pointerdown', function () { var menus = this.scene.get('menus'); menus.displayHideMenu(); this.scene.setVisible(false, 'about');} , this);
 
     },
 

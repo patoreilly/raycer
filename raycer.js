@@ -26,10 +26,10 @@ var Raycer = new Phaser.Class({
         
 
         // global
-        this.globalStartTime; 
-        this.newLapTimeMark;
-        
-        
+        this.raycer_mode = 'demo';
+
+        this.background_index = 0;
+        this.total_backgrounds = 4;
 
         this.fDistance = 0.0;        // Distance car has travelled around track in 'meters'
         this.fCurvature = 0.0;        // Current track curvature, lerped between track sections
@@ -41,6 +41,7 @@ var Raycer = new Phaser.Class({
         this.fSpeed = 0.0;            // Current player speed
         this.listLapTimes = [0,0,0,0,0];       // List of previous lap times
         this.fCurrentLapTime = 0.0;          // Current lap time
+        this.totalRaceTime = 0.0;
 
         this.vecTrack = []; // Track sections, sharpness of bend, length of section
 
@@ -120,7 +121,7 @@ var Raycer = new Phaser.Class({
         this.gamedisplay.pixels = this.gamedisplay.imagedata.data;
         // init images of background, ground, scenery, obstacles, gamedisplay, cycle sprite
 
-        this.background_image = this.add.image(0,0,'background').setOrigin(0).setScale(1);
+        this.background_image = this.add.image(0,0,'background0').setOrigin(0).setScale(1);
         this.background_arc = 0;
 
         this.add.image(0,this.GameHeight/2,'gamedisplaycanvas').setOrigin(0).setScale(1).setDepth(1);
@@ -132,7 +133,7 @@ var Raycer = new Phaser.Class({
         
         //total set of road objects
         this.road_group = this.add.group();
-        this.road_groupArray = this.road_group.getChildren();
+        //this.road_groupArray = this.road_group.getChildren();
 
         var road_sprite; //worker just to init sprites in group
 
@@ -140,7 +141,7 @@ var Raycer = new Phaser.Class({
         {
             road_sprite = this.add.image(0,0,'rock').setOrigin(.5,.5).setVisible(false);
             road_sprite.label = 'rock';
-            road_sprite.location = {distance:Phaser.Math.Between(100,this.fTrackDistance), position:0.0};
+            road_sprite.location = {distance:Phaser.Math.Between(100,this.fTrackDistance-100), position:0.0};
             var spriteDepth = 100 - Math.floor(100*(road_sprite.location.distance/this.fTrackDistance));
             
             road_sprite.setDepth(spriteDepth);
@@ -152,7 +153,7 @@ var Raycer = new Phaser.Class({
         {
             road_sprite = this.add.image(0,0,'bump').setOrigin(.5,.5).setVisible(false);
             road_sprite.label = 'bump';
-            road_sprite.location = {distance:Phaser.Math.Between(100,this.fTrackDistance), position:0.0};
+            road_sprite.location = {distance:Phaser.Math.Between(100,this.fTrackDistance-100), position:0.0};
             var spriteDepth = 100 - Math.floor(100*(road_sprite.location.distance/this.fTrackDistance));
             road_sprite.setDepth(spriteDepth);
 
@@ -161,43 +162,100 @@ var Raycer = new Phaser.Class({
 
 
         //total set of scenery objects
-        this.scenery_group = this.add.group();
-        this.scenery_groupArray = this.scenery_group.getChildren();
-
+        this.scenery_group =[];
         var scenery_sprite; //worker just to init sprites in group
 
+        this.scenery_group[0] = this.add.group();
         for (var i = 0; i < 50; i++)
         {
-            scenery_sprite = this.add.image(0,0,'tree'+Phaser.Math.Between(4,9)).setOrigin(.5,1.0).setVisible(false);
-            scenery_sprite.label = 'tree';
-            scenery_sprite.location = {distance:Phaser.Math.Between(100,this.fTrackDistance), orientation:'left'};
+            scenery_sprite = this.add.image(0,0,'rock'+Phaser.Math.Between(1,4)).setOrigin(.5,1.0).setVisible(false);
+            scenery_sprite.label = 'rock';
+            scenery_sprite.location = {distance:Phaser.Math.Between(100,this.fTrackDistance-100), orientation:'left'};
             var spriteDepth = 100-Math.floor(100*(scenery_sprite.location.distance/this.fTrackDistance));
             scenery_sprite.setDepth(spriteDepth);
 
-            this.scenery_group.add(scenery_sprite);
+            this.scenery_group[0].add(scenery_sprite);
 
-            scenery_sprite = this.add.image(0,0,'tree'+Phaser.Math.Between(4,9)).setOrigin(.5,1.0).setVisible(false);
-            scenery_sprite.label = 'tree';
-            scenery_sprite.location = {distance:Phaser.Math.Between(100,2200), orientation:'right'};
+            scenery_sprite = this.add.image(0,0,'rock'+Phaser.Math.Between(1,4)).setOrigin(.5,1.0).setVisible(false);
+            scenery_sprite.label = 'rock';
+            scenery_sprite.location = {distance:Phaser.Math.Between(100,this.fTrackDistance-100), orientation:'right'};
             var spriteDepth = 100 - Math.floor(100*(scenery_sprite.location.distance/this.fTrackDistance));
             scenery_sprite.setDepth(spriteDepth);
 
-            this.scenery_group.add(scenery_sprite);
-
-            
+            this.scenery_group[0].add(scenery_sprite);
         }
 
-        for (var i = 0; i < 10; i++)
+        this.scenery_group[1] = this.add.group();
+        for (var i = 0; i < 50; i++)
         {
-            scenery_sprite = this.add.image(0,0,'atari_sign').setOrigin(0,1.0).setVisible(false);
-            scenery_sprite.label = 'atari_sign';
-            scenery_sprite.location = {distance:Phaser.Math.Between(100,2200), orientation:'right'};
+            scenery_sprite = this.add.image(0,0,'fern'+Phaser.Math.Between(1,8)).setOrigin(.5,1.0).setVisible(false);
+            scenery_sprite.label = 'fern';
+            scenery_sprite.location = {distance:Phaser.Math.Between(100,this.fTrackDistance-100), orientation:'left'};
+            var spriteDepth = 100-Math.floor(100*(scenery_sprite.location.distance/this.fTrackDistance));
+            scenery_sprite.setDepth(spriteDepth);
+
+            this.scenery_group[1].add(scenery_sprite);
+
+            scenery_sprite = this.add.image(0,0,'fern'+Phaser.Math.Between(1,8)).setOrigin(.5,1.0).setVisible(false);
+            scenery_sprite.label = 'fern';
+            scenery_sprite.location = {distance:Phaser.Math.Between(100,this.fTrackDistance-100), orientation:'right'};
             var spriteDepth = 100 - Math.floor(100*(scenery_sprite.location.distance/this.fTrackDistance));
             scenery_sprite.setDepth(spriteDepth);
 
-            this.scenery_group.add(scenery_sprite);
+            this.scenery_group[1].add(scenery_sprite);
         }
 
+        this.scenery_group[2] = this.add.group();
+        for (var i = 0; i < 50; i++)
+        {
+            scenery_sprite = this.add.image(0,0,'plant'+Phaser.Math.Between(3,6)).setOrigin(.5,1.0).setVisible(false);
+            scenery_sprite.label = 'plant';
+            scenery_sprite.location = {distance:Phaser.Math.Between(100,this.fTrackDistance-100), orientation:'left'};
+            var spriteDepth = 100-Math.floor(100*(scenery_sprite.location.distance/this.fTrackDistance));
+            scenery_sprite.setDepth(spriteDepth);
+
+            this.scenery_group[2].add(scenery_sprite);
+
+            scenery_sprite = this.add.image(0,0,'plant'+Phaser.Math.Between(3,6)).setOrigin(.5,1.0).setVisible(false);
+            scenery_sprite.label = 'plant';
+            scenery_sprite.location = {distance:Phaser.Math.Between(100,this.fTrackDistance-100), orientation:'right'};
+            var spriteDepth = 100 - Math.floor(100*(scenery_sprite.location.distance/this.fTrackDistance));
+            scenery_sprite.setDepth(spriteDepth);
+
+            this.scenery_group[2].add(scenery_sprite);
+        }
+
+        this.scenery_group[3] = this.add.group();        
+        for (var i = 0; i < 50; i++)
+        {
+            scenery_sprite = this.add.image(0,0,'tree'+Phaser.Math.Between(16,16)).setOrigin(.5,1.0).setVisible(false);
+            scenery_sprite.label = 'tree';
+            scenery_sprite.location = {distance:Phaser.Math.Between(100,this.fTrackDistance-100), orientation:'left'};
+            var spriteDepth = 100-Math.floor(100*(scenery_sprite.location.distance/this.fTrackDistance));
+            scenery_sprite.setDepth(spriteDepth);
+
+            this.scenery_group[3].add(scenery_sprite);
+
+            scenery_sprite = this.add.image(0,0,'tree'+Phaser.Math.Between(16,16)).setOrigin(.5,1.0).setVisible(false);
+            scenery_sprite.label = 'tree';
+            scenery_sprite.location = {distance:Phaser.Math.Between(100,this.fTrackDistance-100), orientation:'right'};
+            var spriteDepth = 100 - Math.floor(100*(scenery_sprite.location.distance/this.fTrackDistance));
+            scenery_sprite.setDepth(spriteDepth);
+
+            this.scenery_group[3].add(scenery_sprite);
+        }
+
+        // for (var i = 0; i < 10; i++)
+        // {
+        //     scenery_sprite = this.add.image(0,0,'atari_sign').setOrigin(0,1.0).setVisible(false);
+        //     scenery_sprite.label = 'atari_sign';
+        //     scenery_sprite.location = {distance:Phaser.Math.Between(100,2200), orientation:'right'};
+        //     var spriteDepth = 100 - Math.floor(100*(scenery_sprite.location.distance/this.fTrackDistance));
+        //     scenery_sprite.setDepth(spriteDepth);
+
+        //     this.scenery_group[3].add(scenery_sprite);
+        // }
+        
 
         /// keyboard input 
         cursors = this.input.keyboard.createCursorKeys();
@@ -214,10 +272,7 @@ var Raycer = new Phaser.Class({
 
         }, this);
         
-        /// mark global start time
-
-        this.globalStartTime = game.loop.now;
-        this.newLapTimeMark = 0;
+        
 
         /// debug global
         debug = this.add.text(10, 10, '', { font: '10px Arial', fill: '#ffffff' });
@@ -233,6 +288,17 @@ var Raycer = new Phaser.Class({
         /// launch menus and title
         this.scene.launch('menus');
         this.scene.launch('title');
+        
+        
+
+        /// mark lap start time
+
+        this.lapStartTime = game.loop.now;
+        this.raceStartTime = this.lapStartTime;
+        //this.newLapTimeMark = 0;
+        
+
+        
 
 
 
@@ -242,9 +308,10 @@ var Raycer = new Phaser.Class({
     
     update: function()
     {
-        if (menu_mode) {this.scene.setActive(false, 'raycer')}
+        var thisContext=this;
         
-        var fElapsedTime = (game.loop.now - this.globalStartTime)/1000;
+        this.fCurrentLapTime = (game.loop.now - this.lapStartTime)/1000;
+        this.totalRaceTime = (game.loop.now - this.raceStartTime)/1000;
 
         //instead of fElapsedTime, fSpeedFactor will scale range of throttling (which effectively represents gear shifting for lower to higher ranges of speed)
 
@@ -255,47 +322,63 @@ var Raycer = new Phaser.Class({
         // Handle control input
         var nCarDirection = 0;
         
-
-        //player control input handlers
-        if (gTouching)
+        if (this.raycer_mode == 'demo')
         {
-            var touchXDelta = (guide_multi.input.localX-.5);
-            var touchYDelta = (guide_multi.input.localY-.5);
+            this.fSpeed += 2.0 * fSpeedFactor;
+        }
+        else
+        {
+            //player control input handlers
+            if (gTouching)
+            {
+                var touchXDelta = (guide_multi.input.localX-.5);
+                var touchYDelta = (guide_multi.input.localY-.5);
 
-            if (touchXDelta<-.25) guiLeft=true
-                else guiLeft=false;
-            if (touchXDelta>.25) guiRight=true
-                else guiRight=false;
-            if (touchYDelta<-.25) guiUp=true
-                else guiUp=false;
+                if (touchXDelta<-.25) guiLeft=true
+                    else guiLeft=false;
+                if (touchXDelta>.25) guiRight=true
+                    else guiRight=false;
+                if (touchYDelta<-.25) guiUp=true
+                    else guiUp=false;
+            }
+            
+
+            if (cursors.up.isDown || guiUp || gamepad.up)
+                this.fSpeed += 2.0 * fSpeedFactor;
+            else
+                this.fSpeed -= 1.0 * fSpeedFactor;
+
+            // Car Curvature is accumulated left/right input, but inversely proportional to speed
+            // i.e. it is harder to turn at high speed
+            if (cursors.left.isDown || guiLeft || gamepad.left)
+            {
+                this.fPlayerCurvature -= 2.0 * fSpeedFactor * (1.0 - this.fSpeed / 2.0);
+                nCarDirection = -1;
+            }
+
+            if (cursors.right.isDown || guiRight || gamepad.right)
+            {
+                this.fPlayerCurvature += 2.0 * fSpeedFactor * (1.0 - this.fSpeed / 2.0);
+                nCarDirection = +1;
+            }
+            //end player control
+
         }
         
 
-        if (cursors.up.isDown || guiUp || gamepad.up)
-            this.fSpeed += 2.0 * fSpeedFactor;
-        else
-            this.fSpeed -= 1.0 * fSpeedFactor;
-
-        // Car Curvature is accumulated left/right input, but inversely proportional to speed
-        // i.e. it is harder to turn at high speed
-        if (cursors.left.isDown || guiLeft || gamepad.left)
-        {
-            this.fPlayerCurvature -= 2.0 * fSpeedFactor * (1.0 - this.fSpeed / 2.0);
-            nCarDirection = -1;
-        }
-
-        if (cursors.right.isDown || guiRight || gamepad.right)
-        {
-            this.fPlayerCurvature += 2.0 * fSpeedFactor * (1.0 - this.fSpeed / 2.0);
-            nCarDirection = +1;
-        }
-        //end player control
-
-
         // If car curvature is too different to track curvature, slow down
         // as car has gone off track
-        if (Math.abs(this.fPlayerCurvature - this.fTrackCurvature) >= 0.8)
+
+        if (this.raycer_mode != 'demo')
+        {
+            if (Math.abs(this.fPlayerCurvature - this.fTrackCurvature) >= 0.8)
             this.fSpeed -= 5.0 * fSpeedFactor;
+        }
+        else
+        {
+            this.fPlayerCurvature = this.fTrackCurvature;
+        }
+        
 
         // Clamp Speed
         if (this.fSpeed < 0.0)  this.fSpeed = 0.0;
@@ -311,14 +394,29 @@ var Raycer = new Phaser.Class({
         var nTrackSection = 0;
 
         // Lap Timing and counting
-        this.fCurrentLapTime = fElapsedTime - this.newLapTimeMark;
+        // this.fCurrentLapTime = fElapsedTime;// - this.newLapTimeMark;
         if (this.fDistance >= this.fTrackDistance)
         {
-            this.fDistance -= this.fTrackDistance;
+            this.fDistance = 0; // -= this.fTrackDistance;
             this.listLapTimes.unshift(this.fCurrentLapTime);
             this.listLapTimes.pop();
-            this.fCurrentLapTime = 0.0;
-            this.newLapTimeMark = game.loop.now/1000;
+            this.lapStartTime = game.loop.now;
+
+            transitionTween = this.tweens.add({
+                targets: this.background_image,
+                alpha: 0,
+                ease: 'none',
+                duration: 350,
+                yoyo: 1,
+                repeat: 0,
+                paused: false,
+                onYoyo: function ()
+                {
+                    thisContext.background_index++;
+                    if (thisContext.background_index>3) thisContext.background_index=0;
+                    thisContext.background_image.setTexture('background'+thisContext.background_index)
+                }
+            });
         }
         
         // Find position on track (could optimise)
@@ -346,7 +444,7 @@ var Raycer = new Phaser.Class({
         // the last 1/3 of the background image copies first 1/3 so it can wrap seemlessly when animated
         
         // calculate the movement
-        this.background_arc -= this.fCurvature*this.fSpeed;
+        this.background_arc -= this.fCurvature*this.fSpeed*5;
 
         // wrap the image if needed
         if (this.background_arc<-this.GameWidth*2)
@@ -391,8 +489,29 @@ var Raycer = new Phaser.Class({
                 // Using periodic oscillatory functions to give lines, where the phase is controlled
                 // by the distance around the track. These take some fine tuning to give the right "feel"
                 //var nGrassColour = Math.sin(20.0 *  Math.pow(1.0 - fPerspective, 3) + this.fDistance * 0.1) > 0.0 ? 'green' : 'darkgreen';
-                var nGrassColour = Math.sin(80.0 * Math.pow(1.0 - fPerspective, 3) + this.fDistance * .8) > 0.0 ? 'green' : 'darkgreen';
-                var nClipColour = Math.sin(40.0 *  Math.pow(1.0 - fPerspective, 3) + this.fDistance) > 0.0 ? 'red' : 'white';
+                switch (this.background_index)
+                {
+                    case 0:
+                        var nGrassColour = Math.sin(80.0 * Math.pow(1.0 - fPerspective, 3) + this.fDistance * .8) > 0.0 ? 'orange' : 'darkorange';
+                        var nClipColour = Math.sin(40.0 *  Math.pow(1.0 - fPerspective, 3) + this.fDistance) > 0.0 ? 'red' : 'white';
+                        break;
+
+                    case 1:
+                        var nGrassColour = Math.sin(80.0 * Math.pow(1.0 - fPerspective, 3) + this.fDistance * .8) > 0.0 ? 'green' : 'darkgreen';
+                        var nClipColour = Math.sin(40.0 *  Math.pow(1.0 - fPerspective, 3) + this.fDistance) > 0.0 ? 'red' : 'white';
+                        break;
+
+                    case 2:
+                        var nGrassColour = Math.sin(80.0 * Math.pow(1.0 - fPerspective, 3) + this.fDistance * .8) > 0.0 ? 'violet' : 'darkviolet';
+                        var nClipColour = Math.sin(40.0 *  Math.pow(1.0 - fPerspective, 3) + this.fDistance) > 0.0 ? 'blue' : 'white';
+                        break;
+
+                    case 3:
+                        var nGrassColour = Math.sin(80.0 * Math.pow(1.0 - fPerspective, 3) + this.fDistance * .8) > 0.0 ? 'cyan' : 'darkcyan';
+                        var nClipColour = Math.sin(40.0 *  Math.pow(1.0 - fPerspective, 3) + this.fDistance) > 0.0 ? 'red' : 'white';
+                        break;
+                }
+                
                 
                 // if (nClipColour == 'red' && lastClipColour == 'white') var nRoadColour='blue'
                 //     else var nRoadColour='grey'
@@ -452,7 +571,7 @@ var Raycer = new Phaser.Class({
     
 
 
-        var thisContext=this;
+        
 
         // Draw road sprites
         this.road_group.children.iterate( 
@@ -484,7 +603,7 @@ var Raycer = new Phaser.Class({
 
 
         // Draw scenery sprites
-        this.scenery_group.children.iterate( 
+        this.scenery_group[this.background_index].children.iterate( 
             function(_sprite)
             { 
                 // _sprite.setVisible(true);
@@ -515,8 +634,8 @@ var Raycer = new Phaser.Class({
                     
                     var nRow = thisContext.GameHeight / 2 + _spriteY;
                     
-                    if (_sprite.location.orientation == 'left') _sprite.setPosition(nLeftGrass,nRow).setScale(_spritePerspective)
-                        else _sprite.setPosition(nRightGrass,nRow).setScale(_spritePerspective)
+                    if (_sprite.location.orientation == 'left') _sprite.setPosition(nLeftGrass,nRow).setScale(_spritePerspective*2)
+                        else _sprite.setPosition(nRightGrass,nRow).setScale(_spritePerspective*2)
             
                 }
                 else
@@ -525,7 +644,6 @@ var Raycer = new Phaser.Class({
                 }
 
             } );
-
 
         // var debugt = [];
                 
@@ -549,9 +667,12 @@ var Raycer = new Phaser.Class({
         if (colorkey=='green') { r=95; g=127; b=15; }
         if (colorkey=='darkgreen') { r=100; g=135; b=20; }
         if (colorkey=='blue') { r=0; g=0; b=255; }
-        if (colorkey=='orange') { r=255; g=255; b=0; }
-        if (colorkey=='cyan') { r=0; g=255; b=255; }
-        if (colorkey=='violet') { r=255; g=0; b=255; }
+        if (colorkey=='orange') { r=100; g=100; b=10; }
+        if (colorkey=='darkorange') { r=120; g=80; b=20; }
+        if (colorkey=='cyan') { r=0; g=110; b=180; }
+        if (colorkey=='darkcyan') { r=10; g=130; b=220; }
+        if (colorkey=='violet') { r=200; g=0; b=200; }
+        if (colorkey=='darkviolet') { r=255; g=50; b=255; }
         if (colorkey=='white') { r=255; g=255; b=255; }
         if (colorkey=='grey') { r=100; g=100; b=120; }
 
