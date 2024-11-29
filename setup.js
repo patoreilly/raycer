@@ -38,6 +38,7 @@ var Setup = new Phaser.Class({
 
         this.load.image('Hat Trick Hero', 'gui/Hat Trick Hero 95 (modified).png');
 
+        this.load.image('Kaiser Knuckle', 'gui/Kaiser Knuckle (Taito).png');
         
 
         //this.load.spritesheet('flybug', 'gui/fly1_sheet1.png',{ frameWidth: 52, frameHeight: 34 });
