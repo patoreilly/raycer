@@ -66,11 +66,16 @@ var Setup = new Phaser.Class({
 
         this.load.image('ground', 'sprites/ground_sand.png')
         this.load.image('raycer_cycle', 'sprites/raycer_cycle.png');
-        this.load.image('raycer_cycle_L', 'sprites/raycer_cycle_L.png');
-        this.load.image('raycer_cycle_R', 'sprites/raycer_cycle_R.png');
+        this.load.image('raycer_cycle_L2', 'sprites/raycer_cycle_L2.png');
+        this.load.image('raycer_cycle_R2', 'sprites/raycer_cycle_R2.png');
         this.load.image('rock', 'sprites/rock8.png');
         this.load.image('bump', 'sprites/bump1.png');
         this.load.image('atari_sign', 'sprites/wallq.png');
+
+        this.load.image('enemy_cycle1', 'sprites/enemy_cycle1.png');
+        this.load.image('enemy_cycle2', 'sprites/enemy_cycle2.png');
+        this.load.image('enemy_cycle3', 'sprites/enemy_cycle3.png');
+        this.load.image('enemy_cycle4', 'sprites/enemy_cycle4.png');
 
         this.load.image('rock1', 'sprites/rock1.png');
         this.load.image('rock2', 'sprites/rock2.png');

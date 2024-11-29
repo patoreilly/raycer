@@ -101,16 +101,15 @@ var Raycer = new Phaser.Class({
             //console.log(y,_rowZ,perspective,pWidth,xOffset);
 
             this.ground.context.drawImage(this.ground.srcimg, xOffset, y,pWidth,1,0,y,320,1);
-
         }
-        
-
 
         this.ground.imagedata =  this.ground.context.getImageData(0,0,width, height);
         this.ground.pixels = this.ground.imagedata.data;
         this.ground.buffer.refresh();
 
+
         // game display buffer (outputs primary game mechanic for road animation)
+
         this.gamedisplay = {};
         this.gamedisplay.buffer = this.textures.createCanvas('gamedisplaycanvas', this.GameWidth, this.GameHeight/2); 
         this.gamedisplay.context = this.gamedisplay.buffer.getContext('2d', {willReadFrequently:true});
@@ -119,7 +118,9 @@ var Raycer = new Phaser.Class({
         
         this.gamedisplay.imagedata =  this.gamedisplay.context.getImageData(0,0,this.gamedisplay.buffer.width, this.gamedisplay.buffer.height);
         this.gamedisplay.pixels = this.gamedisplay.imagedata.data;
-        // init images of background, ground, scenery, obstacles, gamedisplay, cycle sprite
+
+
+        // init images of background & gamedisplay, cycle sprite, obstacles, scenery, enemies, starting line
 
         this.background_image = this.add.image(0,0,'background0').setOrigin(0).setScale(1);
         this.background_arc = 0;
@@ -131,6 +132,49 @@ var Raycer = new Phaser.Class({
         this.raycer_cycle_sprite = this.add.image(0,0,'raycer_cycle').setDepth(200);
 
         
+        //total set of enemy objects
+        this.enemy_group = this.add.group();
+        //this.enemy_groupArray = this.enemy_group.getChildren();
+
+        var enemy_sprite; //worker just to init sprites in group
+
+        enemy_sprite = this.add.image(0,0,'enemy_cycle1').setOrigin(.5,.5).setVisible(false);
+        enemy_sprite.label = 'enemy_cycle';
+        enemy_sprite.location = {distance:400, position:0.2};
+        enemy_sprite.speed = 0;
+        var spriteDepth = 100; //100 - Math.floor(100*(enemy_sprite.location.distance/this.fTrackDistance));
+        enemy_sprite.setDepth(spriteDepth);
+
+        this.enemy_group.add(enemy_sprite);
+
+        enemy_sprite = this.add.image(0,0,'enemy_cycle2').setOrigin(.5,.5).setVisible(false);
+        enemy_sprite.label = 'enemy_cycle';
+        enemy_sprite.location = {distance:400, position:0.4};
+        enemy_sprite.speed = 0;
+        var spriteDepth = 100; //100 - Math.floor(100*(enemy_sprite.location.distance/this.fTrackDistance));
+        enemy_sprite.setDepth(spriteDepth);
+
+        this.enemy_group.add(enemy_sprite);
+
+        enemy_sprite = this.add.image(0,0,'enemy_cycle3').setOrigin(.5,.5).setVisible(false);
+        enemy_sprite.label = 'enemy_cycle';
+        enemy_sprite.location = {distance:400, position:-0.1};
+        enemy_sprite.speed = 0;
+        var spriteDepth = 100; //100 - Math.floor(100*(enemy_sprite.location.distance/this.fTrackDistance));
+        enemy_sprite.setDepth(spriteDepth);
+
+        this.enemy_group.add(enemy_sprite);
+
+        enemy_sprite = this.add.image(0,0,'enemy_cycle4').setOrigin(.5,.5).setVisible(false);
+        enemy_sprite.label = 'enemy_cycle';
+        enemy_sprite.location = {distance:400, position:-0.3};
+        enemy_sprite.speed = 0;
+        var spriteDepth = 100; //100 - Math.floor(100*(enemy_sprite.location.distance/this.fTrackDistance));
+        enemy_sprite.setDepth(spriteDepth);
+
+        this.enemy_group.add(enemy_sprite);
+        
+
         //total set of road objects
         this.road_group = this.add.group();
         //this.road_groupArray = this.road_group.getChildren();
@@ -159,6 +203,7 @@ var Raycer = new Phaser.Class({
 
             this.road_group.add(road_sprite);
         }
+
 
 
         //total set of scenery objects
@@ -561,17 +606,60 @@ var Raycer = new Phaser.Class({
             break;
 
         case +1:
-            this.raycer_cycle_sprite.setPosition(nCarPos,164).setTexture('raycer_cycle_R');
+            this.raycer_cycle_sprite.setPosition(nCarPos,164).setTexture('raycer_cycle_R2');
             break;
 
         case -1:
-            this.raycer_cycle_sprite.setPosition(nCarPos,164).setTexture('raycer_cycle_L');
+            this.raycer_cycle_sprite.setPosition(nCarPos,164).setTexture('raycer_cycle_L2');
             break;
         }
     
 
 
-        
+        // Draw enemy sprites
+        this.enemy_group.children.iterate( 
+            function(_sprite)
+            { 
+                // _sprite.setVisible(true);
+
+                // console.log(_sprite.location.distance);
+                // console.log(_sprite.location.orientation);
+
+                if ( _sprite.location.distance<thisContext.fDistance && _sprite.location.distance>thisContext.fDistance-60 )
+                {
+                    _sprite.setVisible(true);
+
+                    var _spriteZ = (thisContext.fDistance-(_sprite.location.distance));
+
+                    var _spriteY = ((_spriteZ)*(_spriteZ)*(_spriteZ))/2000;
+                    
+
+            
+                    var _spritePerspective = _spriteY / (thisContext.GameHeight/2.0);
+                    var _spriteMiddlePoint = 0.5 + thisContext.fCurvature * Math.pow((1.0 - _spritePerspective), 3);
+                    //var _spriteX = Math.round(_spriteMiddlePoint * this.GameWidth);
+
+                    var fRoadWidth = 0.02 + _spritePerspective * 0.8; // Min 10% Max 90%
+                    //fRoadWidth *= 0.5; // Halve it as track is symmetrical around center of track, but offset...
+                    var fenemyHorizontalPosition = fRoadWidth * _sprite.location.position;
+                    
+
+                    var _spriteX = Math.round( (_spriteMiddlePoint + fenemyHorizontalPosition) * thisContext.GameWidth );
+                    
+                    
+                    var nRow = thisContext.GameHeight / 2 + _spriteY;
+                    
+                    _sprite.setPosition(_spriteX,nRow).setScale(_spritePerspective*2)
+            
+                }
+                else
+                {
+                    _sprite.setVisible(false);
+                }
+
+            } );
+
+
 
         // Draw road sprites
         this.road_group.children.iterate( 
