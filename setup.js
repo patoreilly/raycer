@@ -330,9 +330,9 @@ var Setup = new Phaser.Class({
 
             sound_enabled = true;
 
-            //this.scale.startFullscreen();
+            this.scale.startFullscreen();
 
-            //screen.orientation.lock('landscape');
+            screen.orientation.lock('landscape');
             
             touchActivated = true;
 
