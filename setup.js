@@ -63,9 +63,14 @@ var Setup = new Phaser.Class({
         this.load.image('background1', 'sprites/backscroll1.png');
         this.load.image('background2', 'sprites/backscroll2.png');
         this.load.image('background3', 'sprites/backscroll3.png');
+        this.load.image('background4', 'sprites/backscroll4.png');
+        this.load.image('background5', 'sprites/backscroll5.png');
+        this.load.image('background6', 'sprites/backscroll6.png');
 
         this.load.image('ground', 'sprites/ground_sand.png')
         this.load.image('raycer_cycle', 'sprites/raycer_cycle.png');
+        this.load.image('raycer_cycle_L1', 'sprites/raycer_cycle_L1.png');
+        this.load.image('raycer_cycle_R1', 'sprites/raycer_cycle_R1.png');
         this.load.image('raycer_cycle_L2', 'sprites/raycer_cycle_L2.png');
         this.load.image('raycer_cycle_R2', 'sprites/raycer_cycle_R2.png');
         this.load.image('rock', 'sprites/rock8.png');
@@ -73,9 +78,26 @@ var Setup = new Phaser.Class({
         this.load.image('atari_sign', 'sprites/wallq.png');
 
         this.load.image('enemy_cycle1', 'sprites/enemy_cycle1.png');
+        this.load.image('enemy_cycle1_L1', 'sprites/enemy_cycle1_L1.png');
+        this.load.image('enemy_cycle1_R1', 'sprites/enemy_cycle1_R1.png');
+        this.load.image('enemy_cycle1_L2', 'sprites/enemy_cycle1_L2.png');
+        this.load.image('enemy_cycle1_R2', 'sprites/enemy_cycle1_R2.png');
         this.load.image('enemy_cycle2', 'sprites/enemy_cycle2.png');
+        this.load.image('enemy_cycle2_L1', 'sprites/enemy_cycle2_L1.png');
+        this.load.image('enemy_cycle2_R1', 'sprites/enemy_cycle2_R1.png');
+        this.load.image('enemy_cycle2_L2', 'sprites/enemy_cycle2_L2.png');
+        this.load.image('enemy_cycle2_R2', 'sprites/enemy_cycle2_R2.png');
         this.load.image('enemy_cycle3', 'sprites/enemy_cycle3.png');
+        this.load.image('enemy_cycle3_L1', 'sprites/enemy_cycle3_L1.png');
+        this.load.image('enemy_cycle3_R1', 'sprites/enemy_cycle3_R1.png');
+        this.load.image('enemy_cycle3_L2', 'sprites/enemy_cycle3_L2.png');
+        this.load.image('enemy_cycle3_R2', 'sprites/enemy_cycle3_R2.png');
         this.load.image('enemy_cycle4', 'sprites/enemy_cycle4.png');
+        this.load.image('enemy_cycle4_L1', 'sprites/enemy_cycle4_L1.png');
+        this.load.image('enemy_cycle4_R1', 'sprites/enemy_cycle4_R1.png');
+        this.load.image('enemy_cycle4_L2', 'sprites/enemy_cycle4_L2.png');
+        this.load.image('enemy_cycle4_R2', 'sprites/enemy_cycle4_R2.png');
+
 
         this.load.image('rock1', 'sprites/rock1.png');
         this.load.image('rock2', 'sprites/rock2.png');
@@ -237,6 +259,8 @@ var Setup = new Phaser.Class({
     
     create: function ()
     {
+        /// debug global
+        debug = this.add.text(160, 100, '', { font: '10px Arial', fill: '#00ff00' });
 
         // access to functions belonging to other scenes in Phaser: this.scene.get
         // use worker variable to hold the scene object accessed thru scene key
@@ -252,7 +276,7 @@ var Setup = new Phaser.Class({
 
         startFlag=false;
 
-
+        
         
 
         

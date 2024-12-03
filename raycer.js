@@ -16,7 +16,7 @@ var Raycer = new Phaser.Class({
 
     preload: function ()
     {
-        
+        this.load.spritesheet('explosion', 'sprites/explosion.png',{ frameWidth: 32, frameHeight: 32 });
 
     },
 
@@ -24,6 +24,21 @@ var Raycer = new Phaser.Class({
     {
 
         
+
+        this.anims.create({
+                key: 'fireball_animation',
+                frames: this.anims.generateFrameNumbers('explosion'),
+                frameRate: 20,
+                repeat: 0
+                //yoyo: true
+            });    
+
+        
+        
+
+
+        var thisContext = this;
+        this.fTargetCurvature;
 
         // global
         this.raycer_mode = 'demo';
@@ -77,35 +92,39 @@ var Raycer = new Phaser.Class({
         
 
 
-        // ground buffer (image data for ground animation)
-        this.ground = {};
-        this.ground.srcimg = this.textures.get('ground').getSourceImage();
-        var width = this.ground.srcimg.width;
-        var height = this.ground.srcimg.height
-        this.ground.buffer = this.textures.createCanvas('groundcanvas', width, height); 
-        this.ground.context = this.ground.buffer.getContext('2d', {willReadFrequently:true});
+        // // ground buffer (image data for ground animation)
+        // this.ground = {};
+        // this.ground.srcimg = this.textures.get('ground').getSourceImage();
+        // var width = this.ground.srcimg.width;
+        // var height = this.ground.srcimg.height
+        // this.ground.buffer = this.textures.createCanvas('groundcanvas', width, height); 
+        // this.ground.context = this.ground.buffer.getContext('2d', {willReadFrequently:true});
 
-        for (var y=0; y<100; y++)
-        {
-            var _rowZ = 100 - y;
+        // for (var y=0; y<100; y++)
+        // {
+        //     var _rowZ = 100 - y;
 
-            var perspective = ((_rowZ)*(_rowZ)*(_rowZ))/1100000;
-            // / (this.GameHeight/2.0);
+        //     var perspective = ((_rowZ)*(_rowZ)*(_rowZ))/1100000;
+        //     // / (this.GameHeight/2.0);
 
-            //var perspective = y/100;
+        //     //var perspective = y/100;
 
-            var pWidth = 320 * (perspective);
+        //     var pWidth = 320 * (perspective);
 
-            var xOffset = Math.floor((320-pWidth)*.5);
+        //     var xOffset = Math.floor((320-pWidth)*.5);
 
-            //console.log(y,_rowZ,perspective,pWidth,xOffset);
+        //     //console.log(y,_rowZ,perspective,pWidth,xOffset);
 
-            this.ground.context.drawImage(this.ground.srcimg, xOffset, y,pWidth,1,0,y,320,1);
-        }
+        //     this.ground.context.drawImage(this.ground.srcimg, xOffset, y,pWidth,1,0,y,320,1);
+        // }
 
-        this.ground.imagedata =  this.ground.context.getImageData(0,0,width, height);
-        this.ground.pixels = this.ground.imagedata.data;
-        this.ground.buffer.refresh();
+        // this.ground.imagedata =  this.ground.context.getImageData(0,0,width, height);
+        // this.ground.pixels = this.ground.imagedata.data;
+        // this.ground.buffer.refresh();
+
+        // //this.add.image(0,100,'groundcanvas').setOrigin(0).setScale(1).setDepth(201);
+
+
 
 
         // game display buffer (outputs primary game mechanic for road animation)
@@ -127,9 +146,9 @@ var Raycer = new Phaser.Class({
 
         this.add.image(0,this.GameHeight/2,'gamedisplaycanvas').setOrigin(0).setScale(1).setDepth(1);
 
-        //this.add.image(0,100,'groundcanvas').setOrigin(0).setScale(1).setDepth(201);
         
-        this.raycer_cycle_sprite = this.add.image(0,0,'raycer_cycle').setDepth(200);
+        
+        this.raycer_cycle_sprite = this.add.image(0,0,'raycer_cycle').setDepth(162);
 
         
         //total set of enemy objects
@@ -138,41 +157,189 @@ var Raycer = new Phaser.Class({
 
         var enemy_sprite; //worker just to init sprites in group
 
-        enemy_sprite = this.add.image(0,0,'enemy_cycle1').setOrigin(.5,.5).setVisible(false);
-        enemy_sprite.label = 'enemy_cycle';
-        enemy_sprite.location = {distance:400, position:0.2};
-        enemy_sprite.speed = 0;
-        var spriteDepth = 100; //100 - Math.floor(100*(enemy_sprite.location.distance/this.fTrackDistance));
-        enemy_sprite.setDepth(spriteDepth);
+        for (var u=0; u<20; u++)
+        {
+            enemy_sprite = this.add.image(0,0,'enemy_cycle1').setOrigin(.5,.5).setVisible(false);
+            enemy_sprite.label = 'enemy_cycle';
+            enemy_sprite.status = 'alive';
+            enemy_sprite.location = {distance:Phaser.Math.Between(10,30), position:(Phaser.Math.Between(-5,5)/10)};
+            enemy_sprite.speed = (Phaser.Math.Between(8,21)/10);
+            enemy_sprite.lean = function()
+            {
+                if (thisContext.fTargetCurvature>.6) this.setTexture('enemy_cycle1_R2');
+                else if (thisContext.fTargetCurvature>.2 && thisContext.fTargetCurvature<=.6) this.setTexture('enemy_cycle1_R1');
+                else if (thisContext.fTargetCurvature<-.6) this.setTexture('enemy_cycle1_L2');
+                else if (thisContext.fTargetCurvature<-.2 && thisContext.fTargetCurvature>=-.6) this.setTexture('enemy_cycle1_L1');
+                else this.setTexture('enemy_cycle1');
+            }
 
-        this.enemy_group.add(enemy_sprite);
+            this.tweens.add({
 
-        enemy_sprite = this.add.image(0,0,'enemy_cycle2').setOrigin(.5,.5).setVisible(false);
-        enemy_sprite.label = 'enemy_cycle';
-        enemy_sprite.location = {distance:400, position:0.4};
-        enemy_sprite.speed = 0;
-        var spriteDepth = 100; //100 - Math.floor(100*(enemy_sprite.location.distance/this.fTrackDistance));
-        enemy_sprite.setDepth(spriteDepth);
+                        targets: enemy_sprite,
+                        speed: (Phaser.Math.Between(8,21)/10),                    
+                        ease: 'Sine.easeInOut',
+                        duration: 10000,
+                        yoyo: true,
+                        repeat: -1,
+                        paused: false
+                        
 
-        this.enemy_group.add(enemy_sprite);
+                        });
 
-        enemy_sprite = this.add.image(0,0,'enemy_cycle3').setOrigin(.5,.5).setVisible(false);
-        enemy_sprite.label = 'enemy_cycle';
-        enemy_sprite.location = {distance:400, position:-0.1};
-        enemy_sprite.speed = 0;
-        var spriteDepth = 100; //100 - Math.floor(100*(enemy_sprite.location.distance/this.fTrackDistance));
-        enemy_sprite.setDepth(spriteDepth);
+            this.tweens.add({
 
-        this.enemy_group.add(enemy_sprite);
+                        targets: enemy_sprite.location,
+                        position: 0,                    
+                        ease: 'Sine.easeInOut',
+                        duration: 3000,
+                        yoyo: true,
+                        repeat: -1,
+                        paused: false
+                        
 
-        enemy_sprite = this.add.image(0,0,'enemy_cycle4').setOrigin(.5,.5).setVisible(false);
-        enemy_sprite.label = 'enemy_cycle';
-        enemy_sprite.location = {distance:400, position:-0.3};
-        enemy_sprite.speed = 0;
-        var spriteDepth = 100; //100 - Math.floor(100*(enemy_sprite.location.distance/this.fTrackDistance));
-        enemy_sprite.setDepth(spriteDepth);
+                        });
 
-        this.enemy_group.add(enemy_sprite);
+            var spriteDepth = 100; //100 - Math.floor(100*(enemy_sprite.location.distance/this.fTrackDistance));
+            enemy_sprite.setDepth(spriteDepth);
+
+            this.enemy_group.add(enemy_sprite);
+
+            enemy_sprite = this.add.image(0,0,'enemy_cycle2').setOrigin(.5,.5).setVisible(false);
+            enemy_sprite.label = 'enemy_cycle';
+            enemy_sprite.status = 'alive';
+            enemy_sprite.location = {distance:Phaser.Math.Between(10,30), position:(Phaser.Math.Between(-5,5)/10)};
+            enemy_sprite.speed = (Phaser.Math.Between(8,21)/10);
+            enemy_sprite.lean = function()
+            {
+                if (thisContext.fTargetCurvature>.6) this.setTexture('enemy_cycle2_R2');
+                else if (thisContext.fTargetCurvature>.2 && thisContext.fTargetCurvature<=.6) this.setTexture('enemy_cycle2_R1');
+                else if (thisContext.fTargetCurvature<-.6) this.setTexture('enemy_cycle2_L2');
+                else if (thisContext.fTargetCurvature<-.2 && thisContext.fTargetCurvature>=-.6) this.setTexture('enemy_cycle2_L1');
+                else this.setTexture('enemy_cycle2');
+            }
+
+            this.tweens.add({
+
+                        targets: enemy_sprite,
+                        speed: (Phaser.Math.Between(8,21)/10),                    
+                        ease: 'Sine.easeInOut',
+                        duration: 12000,
+                        yoyo: true,
+                        repeat: -1,
+                        paused: false
+                        
+
+                        });
+
+            this.tweens.add({
+
+                        targets: enemy_sprite.location,
+                        position: -0.4,                    
+                        ease: 'Sine.easeInOut',
+                        duration: 3000,
+                        yoyo: true,
+                        repeat: -1,
+                        paused: false
+                        
+
+                        });
+
+            var spriteDepth = 100; //100 - Math.floor(100*(enemy_sprite.location.distance/this.fTrackDistance));
+            enemy_sprite.setDepth(spriteDepth);
+
+            this.enemy_group.add(enemy_sprite);
+
+            enemy_sprite = this.add.image(0,0,'enemy_cycle3').setOrigin(.5,.5).setVisible(false);
+            enemy_sprite.label = 'enemy_cycle';
+            enemy_sprite.status = 'alive';
+            enemy_sprite.location = {distance:Phaser.Math.Between(10,30), position:(Phaser.Math.Between(-5,5)/10)};
+            enemy_sprite.speed = (Phaser.Math.Between(8,21)/10);
+            enemy_sprite.lean = function()
+            {
+                if (thisContext.fTargetCurvature>.6) this.setTexture('enemy_cycle3_R2');
+                else if (thisContext.fTargetCurvature>.2 && thisContext.fTargetCurvature<=.6) this.setTexture('enemy_cycle3_R1');
+                else if (thisContext.fTargetCurvature<-.6) this.setTexture('enemy_cycle3_L2');
+                else if (thisContext.fTargetCurvature<-.2 && thisContext.fTargetCurvature>=-.6) this.setTexture('enemy_cycle3_L1');
+                else this.setTexture('enemy_cycle3');
+            }
+
+            this.tweens.add({
+
+                        targets: enemy_sprite,
+                        speed: (Phaser.Math.Between(8,21)/10),                    
+                        ease: 'Sine.easeInOut',
+                        duration: 15000,
+                        yoyo: true,
+                        repeat: -1,
+                        paused: false
+                        
+
+                        });
+
+            this.tweens.add({
+
+                        targets: enemy_sprite.location,
+                        position: 0.3,                    
+                        ease: 'Sine.easeInOut',
+                        duration: 3000,
+                        yoyo: true,
+                        repeat: -1,
+                        paused: false
+                        
+
+                        });
+
+            var spriteDepth = 100; //100 - Math.floor(100*(enemy_sprite.location.distance/this.fTrackDistance));
+            enemy_sprite.setDepth(spriteDepth);
+
+            this.enemy_group.add(enemy_sprite);
+
+            enemy_sprite = this.add.image(0,0,'enemy_cycle4').setOrigin(.5,.5).setVisible(false);
+            enemy_sprite.label = 'enemy_cycle';
+            enemy_sprite.status = 'alive';
+            enemy_sprite.location = {distance:Phaser.Math.Between(10,30), position:(Phaser.Math.Between(-5,5)/10)};
+            enemy_sprite.speed = (Phaser.Math.Between(8,21)/10);
+            enemy_sprite.lean = function()
+            {
+                if (thisContext.fTargetCurvature>.6) this.setTexture('enemy_cycle4_R2');
+                else if (thisContext.fTargetCurvature>.2 && thisContext.fTargetCurvature<=.6) this.setTexture('enemy_cycle4_R1');
+                else if (thisContext.fTargetCurvature<-.6) this.setTexture('enemy_cycle4_L2');
+                else if (thisContext.fTargetCurvature<-.2 && thisContext.fTargetCurvature>=-.6) this.setTexture('enemy_cycle4_L1');
+                else this.setTexture('enemy_cycle4');
+            }
+
+            this.tweens.add({
+
+                        targets: enemy_sprite,
+                        speed: (Phaser.Math.Between(8,21)/10),                    
+                        ease: 'Sine.easeInOut',
+                        duration: 8000,
+                        yoyo: true,
+                        repeat: -1,
+                        paused: false
+                        
+
+                        });
+
+            this.tweens.add({
+
+                        targets: enemy_sprite.location,
+                        position: .4,                    
+                        ease: 'Sine.easeInOut',
+                        duration: 3000,
+                        yoyo: true,
+                        repeat: -1,
+                        paused: false
+                        
+
+                        });
+
+            var spriteDepth = 100; //100 - Math.floor(100*(enemy_sprite.location.distance/this.fTrackDistance));
+            enemy_sprite.setDepth(spriteDepth);
+
+            this.enemy_group.add(enemy_sprite);
+
+        }
         
 
         //total set of road objects
@@ -186,7 +353,7 @@ var Raycer = new Phaser.Class({
             road_sprite = this.add.image(0,0,'rock').setOrigin(.5,.5).setVisible(false);
             road_sprite.label = 'rock';
             road_sprite.location = {distance:Phaser.Math.Between(100,this.fTrackDistance-100), position:0.0};
-            var spriteDepth = 100 - Math.floor(100*(road_sprite.location.distance/this.fTrackDistance));
+            var spriteDepth = 100;// - Math.floor(100*(road_sprite.location.distance/this.fTrackDistance));
             
             road_sprite.setDepth(spriteDepth);
 
@@ -198,7 +365,7 @@ var Raycer = new Phaser.Class({
             road_sprite = this.add.image(0,0,'bump').setOrigin(.5,.5).setVisible(false);
             road_sprite.label = 'bump';
             road_sprite.location = {distance:Phaser.Math.Between(100,this.fTrackDistance-100), position:0.0};
-            var spriteDepth = 100 - Math.floor(100*(road_sprite.location.distance/this.fTrackDistance));
+            var spriteDepth = 100;// - Math.floor(100*(road_sprite.location.distance/this.fTrackDistance));
             road_sprite.setDepth(spriteDepth);
 
             this.road_group.add(road_sprite);
@@ -216,7 +383,7 @@ var Raycer = new Phaser.Class({
             scenery_sprite = this.add.image(0,0,'rock'+Phaser.Math.Between(1,4)).setOrigin(.5,1.0).setVisible(false);
             scenery_sprite.label = 'rock';
             scenery_sprite.location = {distance:Phaser.Math.Between(100,this.fTrackDistance-100), orientation:'left'};
-            var spriteDepth = 100-Math.floor(100*(scenery_sprite.location.distance/this.fTrackDistance));
+            var spriteDepth = 100;//-Math.floor(100*(scenery_sprite.location.distance/this.fTrackDistance));
             scenery_sprite.setDepth(spriteDepth);
 
             this.scenery_group[0].add(scenery_sprite);
@@ -236,7 +403,7 @@ var Raycer = new Phaser.Class({
             scenery_sprite = this.add.image(0,0,'fern'+Phaser.Math.Between(1,8)).setOrigin(.5,1.0).setVisible(false);
             scenery_sprite.label = 'fern';
             scenery_sprite.location = {distance:Phaser.Math.Between(100,this.fTrackDistance-100), orientation:'left'};
-            var spriteDepth = 100-Math.floor(100*(scenery_sprite.location.distance/this.fTrackDistance));
+            var spriteDepth = 100;//-Math.floor(100*(scenery_sprite.location.distance/this.fTrackDistance));
             scenery_sprite.setDepth(spriteDepth);
 
             this.scenery_group[1].add(scenery_sprite);
@@ -244,7 +411,7 @@ var Raycer = new Phaser.Class({
             scenery_sprite = this.add.image(0,0,'fern'+Phaser.Math.Between(1,8)).setOrigin(.5,1.0).setVisible(false);
             scenery_sprite.label = 'fern';
             scenery_sprite.location = {distance:Phaser.Math.Between(100,this.fTrackDistance-100), orientation:'right'};
-            var spriteDepth = 100 - Math.floor(100*(scenery_sprite.location.distance/this.fTrackDistance));
+            var spriteDepth = 100;// - Math.floor(100*(scenery_sprite.location.distance/this.fTrackDistance));
             scenery_sprite.setDepth(spriteDepth);
 
             this.scenery_group[1].add(scenery_sprite);
@@ -256,7 +423,7 @@ var Raycer = new Phaser.Class({
             scenery_sprite = this.add.image(0,0,'plant'+Phaser.Math.Between(3,6)).setOrigin(.5,1.0).setVisible(false);
             scenery_sprite.label = 'plant';
             scenery_sprite.location = {distance:Phaser.Math.Between(100,this.fTrackDistance-100), orientation:'left'};
-            var spriteDepth = 100-Math.floor(100*(scenery_sprite.location.distance/this.fTrackDistance));
+            var spriteDepth = 100;//-Math.floor(100*(scenery_sprite.location.distance/this.fTrackDistance));
             scenery_sprite.setDepth(spriteDepth);
 
             this.scenery_group[2].add(scenery_sprite);
@@ -264,7 +431,7 @@ var Raycer = new Phaser.Class({
             scenery_sprite = this.add.image(0,0,'plant'+Phaser.Math.Between(3,6)).setOrigin(.5,1.0).setVisible(false);
             scenery_sprite.label = 'plant';
             scenery_sprite.location = {distance:Phaser.Math.Between(100,this.fTrackDistance-100), orientation:'right'};
-            var spriteDepth = 100 - Math.floor(100*(scenery_sprite.location.distance/this.fTrackDistance));
+            var spriteDepth = 100;// - Math.floor(100*(scenery_sprite.location.distance/this.fTrackDistance));
             scenery_sprite.setDepth(spriteDepth);
 
             this.scenery_group[2].add(scenery_sprite);
@@ -276,7 +443,7 @@ var Raycer = new Phaser.Class({
             scenery_sprite = this.add.image(0,0,'tree'+Phaser.Math.Between(16,16)).setOrigin(.5,1.0).setVisible(false);
             scenery_sprite.label = 'tree';
             scenery_sprite.location = {distance:Phaser.Math.Between(100,this.fTrackDistance-100), orientation:'left'};
-            var spriteDepth = 100-Math.floor(100*(scenery_sprite.location.distance/this.fTrackDistance));
+            var spriteDepth = 100;//-Math.floor(100*(scenery_sprite.location.distance/this.fTrackDistance));
             scenery_sprite.setDepth(spriteDepth);
 
             this.scenery_group[3].add(scenery_sprite);
@@ -284,10 +451,70 @@ var Raycer = new Phaser.Class({
             scenery_sprite = this.add.image(0,0,'tree'+Phaser.Math.Between(16,16)).setOrigin(.5,1.0).setVisible(false);
             scenery_sprite.label = 'tree';
             scenery_sprite.location = {distance:Phaser.Math.Between(100,this.fTrackDistance-100), orientation:'right'};
-            var spriteDepth = 100 - Math.floor(100*(scenery_sprite.location.distance/this.fTrackDistance));
+            var spriteDepth = 100;// - Math.floor(100*(scenery_sprite.location.distance/this.fTrackDistance));
             scenery_sprite.setDepth(spriteDepth);
 
             this.scenery_group[3].add(scenery_sprite);
+        }
+
+        this.scenery_group[4] = this.add.group();        
+        for (var i = 0; i < 50; i++)
+        {
+            scenery_sprite = this.add.image(0,0,'tree'+Phaser.Math.Between(15,15)).setOrigin(.5,1.0).setVisible(false);
+            scenery_sprite.label = 'tree';
+            scenery_sprite.location = {distance:Phaser.Math.Between(100,this.fTrackDistance-100), orientation:'left'};
+            var spriteDepth = 100;//-Math.floor(100*(scenery_sprite.location.distance/this.fTrackDistance));
+            scenery_sprite.setDepth(spriteDepth);
+
+            this.scenery_group[4].add(scenery_sprite);
+
+            scenery_sprite = this.add.image(0,0,'tree'+Phaser.Math.Between(15,15)).setOrigin(.5,1.0).setVisible(false);
+            scenery_sprite.label = 'tree';
+            scenery_sprite.location = {distance:Phaser.Math.Between(100,this.fTrackDistance-100), orientation:'right'};
+            var spriteDepth = 100;// - Math.floor(100*(scenery_sprite.location.distance/this.fTrackDistance));
+            scenery_sprite.setDepth(spriteDepth);
+
+            this.scenery_group[4].add(scenery_sprite);
+        }
+
+        this.scenery_group[5] = this.add.group();        
+        for (var i = 0; i < 50; i++)
+        {
+            scenery_sprite = this.add.image(0,0,'tree'+Phaser.Math.Between(13,13)).setOrigin(.5,1.0).setVisible(false);
+            scenery_sprite.label = 'tree';
+            scenery_sprite.location = {distance:Phaser.Math.Between(100,this.fTrackDistance-100), orientation:'left'};
+            var spriteDepth = 100;//-Math.floor(100*(scenery_sprite.location.distance/this.fTrackDistance));
+            scenery_sprite.setDepth(spriteDepth);
+
+            this.scenery_group[5].add(scenery_sprite);
+
+            scenery_sprite = this.add.image(0,0,'tree'+Phaser.Math.Between(13,13)).setOrigin(.5,1.0).setVisible(false);
+            scenery_sprite.label = 'tree';
+            scenery_sprite.location = {distance:Phaser.Math.Between(100,this.fTrackDistance-100), orientation:'right'};
+            var spriteDepth = 100;// - Math.floor(100*(scenery_sprite.location.distance/this.fTrackDistance));
+            scenery_sprite.setDepth(spriteDepth);
+
+            this.scenery_group[5].add(scenery_sprite);
+        }
+
+        this.scenery_group[6] = this.add.group();        
+        for (var i = 0; i < 50; i++)
+        {
+            scenery_sprite = this.add.image(0,0,'tree'+Phaser.Math.Between(14,14)).setOrigin(.5,1.0).setVisible(false);
+            scenery_sprite.label = 'tree';
+            scenery_sprite.location = {distance:Phaser.Math.Between(100,this.fTrackDistance-100), orientation:'left'};
+            var spriteDepth = 100;//-Math.floor(100*(scenery_sprite.location.distance/this.fTrackDistance));
+            scenery_sprite.setDepth(spriteDepth);
+
+            this.scenery_group[6].add(scenery_sprite);
+
+            scenery_sprite = this.add.image(0,0,'tree'+Phaser.Math.Between(14,14)).setOrigin(.5,1.0).setVisible(false);
+            scenery_sprite.label = 'tree';
+            scenery_sprite.location = {distance:Phaser.Math.Between(100,this.fTrackDistance-100), orientation:'right'};
+            var spriteDepth = 100;// - Math.floor(100*(scenery_sprite.location.distance/this.fTrackDistance));
+            scenery_sprite.setDepth(spriteDepth);
+
+            this.scenery_group[6].add(scenery_sprite);
         }
 
         // for (var i = 0; i < 10; i++)
@@ -319,8 +546,7 @@ var Raycer = new Phaser.Class({
         
         
 
-        /// debug global
-        debug = this.add.text(10, 10, '', { font: '10px Arial', fill: '#ffffff' });
+        
         
 
         
@@ -343,7 +569,8 @@ var Raycer = new Phaser.Class({
         //this.newLapTimeMark = 0;
         
 
-        
+        /// debug global
+        debug = this.add.text(120, 60, '', { font: '10px Arial', fill: '#00ff00' }).setDepth(200);
 
 
 
@@ -354,7 +581,8 @@ var Raycer = new Phaser.Class({
     update: function()
     {
         var thisContext=this;
-        
+
+              
         this.fCurrentLapTime = (game.loop.now - this.lapStartTime)/1000;
         this.totalRaceTime = (game.loop.now - this.raceStartTime)/1000;
 
@@ -458,7 +686,7 @@ var Raycer = new Phaser.Class({
                 onYoyo: function ()
                 {
                     thisContext.background_index++;
-                    if (thisContext.background_index>3) thisContext.background_index=0;
+                    if (thisContext.background_index>6) thisContext.background_index=0;
                     thisContext.background_image.setTexture('background'+thisContext.background_index)
                 }
             });
@@ -472,8 +700,8 @@ var Raycer = new Phaser.Class({
         }
         
         // Interpolate towards target track curvature
-        var fTargetCurvature = this.vecTrack[nTrackSection - 1].curvature;
-        var fTrackCurveDiff = (fTargetCurvature - this.fCurvature) * fSpeedFactor * this.fSpeed;
+        this.fTargetCurvature = this.vecTrack[nTrackSection - 1].curvature;
+        var fTrackCurveDiff = (this.fTargetCurvature - this.fCurvature) * fSpeedFactor * this.fSpeed;
 
         // Accumulate player curvature
         this.fCurvature += fTrackCurveDiff;
@@ -499,14 +727,6 @@ var Raycer = new Phaser.Class({
         
         this.background_image.setPosition(Math.round(this.background_arc),0);
 
-        
-        // this.gamedisplay.context.clearRect(0, 0, 320, 200);
-        // this.gamedisplay.imagedata =  this.gamedisplay.context.getImageData(0,0,this.gamedisplay.buffer.width, this.gamedisplay.buffer.height);
-        // this.gamedisplay.pixels = this.gamedisplay.imagedata.data;
-        
-        // var lastClipColour;
-        // var nClipColour;
-
         // Draw Track - Each row is split into grass, clip-board and track
         for (var y = 0; y < this.GameHeight / 2; y++)
         {
@@ -524,10 +744,12 @@ var Raycer = new Phaser.Class({
                 var fMiddlePoint = 0.5 + this.fCurvature * Math.pow((1.0 - fPerspective), 3);
 
                 // Work out segment boundaries
+                var nLeftSand = Math.round( (fMiddlePoint - fRoadWidth - fClipWidth*3) * this.GameWidth );
                 var nLeftGrass = Math.round( (fMiddlePoint - fRoadWidth - fClipWidth) * this.GameWidth );
                 var nLeftClip = Math.round( (fMiddlePoint - fRoadWidth) * this.GameWidth );
                 var nRightClip = Math.round( (fMiddlePoint + fRoadWidth) * this.GameWidth );
                 var nRightGrass = Math.round( (fMiddlePoint + fRoadWidth + fClipWidth) * this.GameWidth );
+                var nRightSand = Math.round( (fMiddlePoint + fRoadWidth + fClipWidth*3) * this.GameWidth );
                 
                 var nRow = y;
 
@@ -537,7 +759,7 @@ var Raycer = new Phaser.Class({
                 switch (this.background_index)
                 {
                     case 0:
-                        var nGrassColour = Math.sin(80.0 * Math.pow(1.0 - fPerspective, 3) + this.fDistance * .8) > 0.0 ? 'orange' : 'darkorange';
+                        var nGrassColour = Math.sin(80.0 * Math.pow(1.0 - fPerspective, 3) + this.fDistance * .8) > 0.0 ? 'mutedorange' : 'mutedorange2';
                         var nClipColour = Math.sin(40.0 *  Math.pow(1.0 - fPerspective, 3) + this.fDistance) > 0.0 ? 'red' : 'white';
                         break;
 
@@ -555,28 +777,57 @@ var Raycer = new Phaser.Class({
                         var nGrassColour = Math.sin(80.0 * Math.pow(1.0 - fPerspective, 3) + this.fDistance * .8) > 0.0 ? 'cyan' : 'darkcyan';
                         var nClipColour = Math.sin(40.0 *  Math.pow(1.0 - fPerspective, 3) + this.fDistance) > 0.0 ? 'red' : 'white';
                         break;
+
+                    case 4:
+                        var nGrassColour = Math.sin(80.0 * Math.pow(1.0 - fPerspective, 3) + this.fDistance * .8) > 0.0 ? 'darkred' : 'black';
+                        var nClipColour = Math.sin(40.0 *  Math.pow(1.0 - fPerspective, 3) + this.fDistance) > 0.0 ? 'orange' : 'violet';
+                        break;
+                    
+                    case 5:
+                        var nGrassColour = Math.sin(80.0 * Math.pow(1.0 - fPerspective, 3) + this.fDistance * .8) > 0.0 ? 'darkblue' : 'darkred';
+                        var nClipColour = Math.sin(40.0 *  Math.pow(1.0 - fPerspective, 3) + this.fDistance) > 0.0 ? 'cyan' : 'yellow';
+                        break;
+                    
+                    case 6:
+                        var nGrassColour = Math.sin(80.0 * Math.pow(1.0 - fPerspective, 3) + this.fDistance * .8) > 0.0 ? 'darkpurple' : 'purple';
+                        var nClipColour = Math.sin(40.0 *  Math.pow(1.0 - fPerspective, 3) + this.fDistance) > 0.0 ? 'cyan' : 'violet';
+                        break;
                 }
-                
-                
-                // if (nClipColour == 'red' && lastClipColour == 'white') var nRoadColour='blue'
-                //     else var nRoadColour='grey'
 
-                // Start finish straight changes the road colour to inform the player lap is reset
-                //var nRoadColour = Phaser.Math.Fuzzy.Equal( (this.fDistance-y), Math.round((this.fDistance-y)), .01) ? 'grey' : 'blue';
-                //var roundedDistance = Math.round(this.fDistance);
-                //var nRoadColour = Math.round((roundedDistance-y)/10) == (roundedDistance-y)/10 ? 'blue' : 'grey';
+                if (this.background_index==3)
+                {
+                    // Draw the row segments with sand
+                    if (x >= 0 && x < nLeftSand)
+                        this.drawPixel(x, nRow, nGrassColour);
+                    if (x >= nLeftSand && x < nLeftGrass)
+                        this.drawPixel(x, nRow, 'sand');
+                    if (x >= nLeftGrass && x < nLeftClip)
+                        this.drawPixel(x, nRow, nClipColour);
+                    if (x >= nLeftClip && x < nRightClip)
+                        this.drawPixel(x, nRow, 'grey');
+                    if (x >= nRightClip && x < nRightGrass)
+                        this.drawPixel(x, nRow, nClipColour);
+                    if (x >= nRightGrass && x < nRightSand)
+                        this.drawPixel(x, nRow, 'sand');
+                    if (x >= nRightSand && x < this.GameWidth)
+                        this.drawPixel(x, nRow, nGrassColour);
+                }
+                else
+                {
+                    // Draw the row segments
+                    if (x >= 0 && x < nLeftGrass)
+                        this.drawPixel(x, nRow, nGrassColour);
+                    if (x >= nLeftGrass && x < nLeftClip)
+                        this.drawPixel(x, nRow, nClipColour);
+                    if (x >= nLeftClip && x < nRightClip)
+                        this.drawPixel(x, nRow, 'grey');
+                    if (x >= nRightClip && x < nRightGrass)
+                        this.drawPixel(x, nRow, nClipColour);
+                    if (x >= nRightGrass && x < this.GameWidth)
+                        this.drawPixel(x, nRow, nGrassColour);
+                }
 
-                // Draw the row segments
-                if (x >= 0 && x < nLeftGrass)
-                    this.drawPixel(x, nRow, nGrassColour);
-                if (x >= nLeftGrass && x < nLeftClip)
-                    this.drawPixel(x, nRow, nClipColour);
-                if (x >= nLeftClip && x < nRightClip)
-                    this.drawPixel(x, nRow, 'grey');
-                if (x >= nRightClip && x < nRightGrass)
-                    this.drawPixel(x, nRow, nClipColour);
-                if (x >= nRightGrass && x < this.GameWidth)
-                    this.drawPixel(x, nRow, nGrassColour);
+                
             }
             //lastClipColour = nClipColour;
 
@@ -599,19 +850,33 @@ var Raycer = new Phaser.Class({
 
         // Draw a car that represents what the player is doing. Apologies for the quality
         // of the sprite... :-(
-        switch (nCarDirection)
+
+        if (this.raycer_mode != 'demo')
         {
-        case 0:
-            this.raycer_cycle_sprite.setPosition(nCarPos,164).setTexture('raycer_cycle');
-            break;
+            switch (nCarDirection)
+            {
+            case 0:
+                this.raycer_cycle_sprite.setPosition(nCarPos,162).setTexture('raycer_cycle');
+                break;
 
-        case +1:
-            this.raycer_cycle_sprite.setPosition(nCarPos,164).setTexture('raycer_cycle_R2');
-            break;
+            case +1:
+                this.raycer_cycle_sprite.setPosition(nCarPos,162).setTexture('raycer_cycle_R2');
+                break;
 
-        case -1:
-            this.raycer_cycle_sprite.setPosition(nCarPos,164).setTexture('raycer_cycle_L2');
-            break;
+            case -1:
+                this.raycer_cycle_sprite.setPosition(nCarPos,162).setTexture('raycer_cycle_L2');
+                break;
+            }
+        }
+        else
+        {
+            if (this.fTargetCurvature>.6) this.raycer_cycle_sprite.setTexture('raycer_cycle_R2');
+            else if (this.fTargetCurvature>.2 && this.fTargetCurvature<=.6) this.raycer_cycle_sprite.setTexture('raycer_cycle_R1');
+            else if (this.fTargetCurvature<-.6) this.raycer_cycle_sprite.setTexture('raycer_cycle_L2');
+            else if (this.fTargetCurvature<-.2 && this.fTargetCurvature>=-.6) this.raycer_cycle_sprite.setTexture('raycer_cycle_L1');
+            else this.raycer_cycle_sprite.setTexture('raycer_cycle');
+
+            this.raycer_cycle_sprite.setPosition(nCarPos,162);
         }
     
 
@@ -620,41 +885,76 @@ var Raycer = new Phaser.Class({
         this.enemy_group.children.iterate( 
             function(_sprite)
             { 
-                // _sprite.setVisible(true);
-
-                // console.log(_sprite.location.distance);
-                // console.log(_sprite.location.orientation);
-
-                if ( _sprite.location.distance<thisContext.fDistance && _sprite.location.distance>thisContext.fDistance-60 )
+                if (_sprite.status == 'alive')
                 {
-                    _sprite.setVisible(true);
+                    _sprite.lean();
+                    _sprite.location.distance += _sprite.speed;
+                    if (_sprite.location.distance>=thisContext.fTrackDistance-50) _sprite.location.distance = -50;
 
-                    var _spriteZ = (thisContext.fDistance-(_sprite.location.distance));
+                    if ( _sprite.location.distance<thisContext.fDistance && _sprite.location.distance>thisContext.fDistance-76 )
+                    {
+                        _sprite.setVisible(true);
+                        
+                        var _spriteZ = (thisContext.fDistance-(_sprite.location.distance));
 
-                    var _spriteY = ((_spriteZ)*(_spriteZ)*(_spriteZ))/2000;
-                    
+                        var _spriteY = ((_spriteZ)*(_spriteZ)*(_spriteZ))/2000;
+                
+                        var _spritePerspective = _spriteY / (thisContext.GameHeight/2.0);
+                        var _spriteMiddlePoint = 0.5 + thisContext.fCurvature * Math.pow((1.0 - _spritePerspective), 3);
+                        //var _spriteX = Math.round(_spriteMiddlePoint * this.GameWidth);
 
-            
-                    var _spritePerspective = _spriteY / (thisContext.GameHeight/2.0);
-                    var _spriteMiddlePoint = 0.5 + thisContext.fCurvature * Math.pow((1.0 - _spritePerspective), 3);
-                    //var _spriteX = Math.round(_spriteMiddlePoint * this.GameWidth);
+                        var fRoadWidth = 0.02 + _spritePerspective * 0.8; // Min 10% Max 90%
+                        //fRoadWidth *= 0.5; // Halve it as track is symmetrical around center of track, but offset...
+                        var fenemyHorizontalPosition = fRoadWidth * _sprite.location.position;
 
-                    var fRoadWidth = 0.02 + _spritePerspective * 0.8; // Min 10% Max 90%
-                    //fRoadWidth *= 0.5; // Halve it as track is symmetrical around center of track, but offset...
-                    var fenemyHorizontalPosition = fRoadWidth * _sprite.location.position;
-                    
+                        var _spriteX = Math.round( (_spriteMiddlePoint + fenemyHorizontalPosition) * thisContext.GameWidth );
+                        
+                        var nRow = thisContext.GameHeight / 2 + _spriteY;
+                        
+                        _sprite.setDepth(nRow);
+                        _sprite.setPosition(_spriteX,nRow).setScale(_spritePerspective*1.7)
 
-                    var _spriteX = Math.round( (_spriteMiddlePoint + fenemyHorizontalPosition) * thisContext.GameWidth );
-                    
-                    
-                    var nRow = thisContext.GameHeight / 2 + _spriteY;
-                    
-                    _sprite.setPosition(_spriteX,nRow).setScale(_spritePerspective*2)
-            
-                }
-                else
-                {
-                    _sprite.setVisible(false);
+                        //var rRow = Math.round(nRow);
+                        if ( Phaser.Math.Fuzzy.Equal(_spriteX,nCarPos,7.0) && Phaser.Math.Fuzzy.Equal(nRow,162,5.0) ) 
+                        {
+                            var realSpeed = (70.0 * thisContext.fSpeed) * fSpeedFactor;
+                            if (_sprite.speed<realSpeed)
+                            {
+                                //alert('collision! - you win');
+                                _sprite.status = 'killed';
+
+                                var xDir = Phaser.Math.Between(0,1) == 0 ? 40 : 280 ;
+
+                                thisContext.tweens.add({
+
+                                    targets: _sprite,
+                                    x: xDir,
+                                    y: 140,
+                                    angle: 720,                    
+                                    ease: 'none',
+                                    duration: 500,
+                                    yoyo: false,
+                                    repeat: 0,
+                                    paused: false,
+                                    onComplete: function ()
+                                    {
+                                        _sprite.setVisible(false);
+                                        thisContext.add.sprite(_sprite.x, _sprite.y, 'explosion').play('fireball_animation').setOrigin(.5).setDepth(200);
+                                    }
+
+                                });
+                            }
+                            else
+                            {
+                                //alert('collision! - you lose');
+                            }
+                        }
+                        
+                    }
+                    else
+                    {
+                        _sprite.setVisible(false);
+                    }
                 }
 
             } );
@@ -678,6 +978,8 @@ var Raycer = new Phaser.Class({
                     
                     var nRow = thisContext.GameHeight / 2 + _spriteY;
 
+                    
+                    _sprite.setDepth(nRow);
                     _sprite.setPosition(_spriteX,nRow).setScale(_spritePerspective);
                     
                 }
@@ -706,22 +1008,24 @@ var Raycer = new Phaser.Class({
                     var _spriteZ = (thisContext.fDistance-(_sprite.location.distance));
 
                     var _spriteY = ((_spriteZ)*(_spriteZ)*(_spriteZ))/2000;
-                    
-
             
                     var _spritePerspective = _spriteY / (thisContext.GameHeight/2.0);
                     var _spriteMiddlePoint = 0.5 + thisContext.fCurvature * Math.pow((1.0 - _spritePerspective), 3);
                     //var _spriteX = Math.round(_spriteMiddlePoint * this.GameWidth);
 
                     var fRoadWidth = 0.02 + _spritePerspective * 0.8; // Min 10% Max 90%
-                    var fClipWidth = fRoadWidth * 0.15;
+
+                    var fClipWidth = fRoadWidth * 0.25;
+                    
                     fRoadWidth *= 0.5; // Halve it as track is symmetrical around center of track, but offset...
 
                     var nLeftGrass = Math.round( (_spriteMiddlePoint - fRoadWidth - fClipWidth) * thisContext.GameWidth );
                     var nRightGrass = Math.round( (_spriteMiddlePoint + fRoadWidth + fClipWidth) * thisContext.GameWidth );
                     
                     var nRow = thisContext.GameHeight / 2 + _spriteY;
-                    
+
+                    // adjust depth for scenery
+                    _sprite.setDepth(nRow-16);
                     if (_sprite.location.orientation == 'left') _sprite.setPosition(nLeftGrass,nRow).setScale(_spritePerspective*2)
                         else _sprite.setPosition(nRightGrass,nRow).setScale(_spritePerspective*2)
             
@@ -733,18 +1037,21 @@ var Raycer = new Phaser.Class({
 
             } );
 
-        // var debugt = [];
+        //var debugt = [];
                 
-        //         debugt.push('fps: '+ Math.floor(this.sys.game.loop.actualFps.toString()) );
-        //         // debugt.push('fElapsedTime: '+ fElapsedTime );
-        //         // debugt.push('this.fCurrentLapTime: '+ this.fCurrentLapTime );
-        //         debugt.push('Distance: '+ this.fDistance);
-        //         debugt.push('fOffset: '+ fOffset );
+                //debugt.push('fps: '+ Math.floor(this.sys.game.loop.actualFps.toString()) );
+                // debugt.push('fElapsedTime: '+ fElapsedTime );
+                // debugt.push('fTrackCurveDiff: '+ fTrackCurveDiff );
+                
+                // debugt.push('total track distance: '+ this.fTrackDistance );
+                //debugt.push('this.fSpeed: '+ this.fSpeed );
 
-        //         // debugt.push('touchYDelta: '+ touchYDelta );
+                // debugt.push('curvature difference: '+ (this.fPlayerCurvature - this.fTrackCurvature) );
+                // debugt.push('enemy distance difference: '+ (this.fDistance-this.enemy_groupArray[0].location.distance) );
+
 
                 
-        // debug.setText(debugt);
+        //debug.setText(debugt);
     },
 
     drawPixel: function(xpos,ypos,colorkey)
@@ -755,14 +1062,23 @@ var Raycer = new Phaser.Class({
         if (colorkey=='green') { r=95; g=127; b=15; }
         if (colorkey=='darkgreen') { r=100; g=135; b=20; }
         if (colorkey=='blue') { r=0; g=0; b=255; }
-        if (colorkey=='orange') { r=100; g=100; b=10; }
-        if (colorkey=='darkorange') { r=120; g=80; b=20; }
+        if (colorkey=='orange') { r=224; g=96; b=0; }
+        if (colorkey=='mutedorange') { r=224; g=128; b=0; }
+        if (colorkey=='mutedorange2') { r=210; g=110; b=0; }
         if (colorkey=='cyan') { r=0; g=110; b=180; }
         if (colorkey=='darkcyan') { r=10; g=130; b=220; }
         if (colorkey=='violet') { r=200; g=0; b=200; }
         if (colorkey=='darkviolet') { r=255; g=50; b=255; }
         if (colorkey=='white') { r=255; g=255; b=255; }
         if (colorkey=='grey') { r=100; g=100; b=120; }
+        if (colorkey=='sand') { r=207; g=168; b=103; }
+        if (colorkey=='darkblue') { r=0; g=0; b=40; }
+        if (colorkey=='darkred') { r=40; g=0; b=0; }
+        if (colorkey=='black') { r=0; g=0; b=0; }
+        if (colorkey=='darkgrey') { r=60; g=60; b=60; }
+        if (colorkey=='yellow') { r=240; g=240; b=20; }
+        if (colorkey=='darkpurple') { r=36; g=26; b=46; }
+        if (colorkey=='purple') { r=55; g=35; b=71; }
 
         var bytesPerPixel=4;
         var targetIndex=(this.gamedisplay.buffer.width*bytesPerPixel*ypos) + (bytesPerPixel*xpos);     

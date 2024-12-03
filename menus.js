@@ -305,7 +305,7 @@ var Menus = new Phaser.Class({
             });
 
         /// debug global
-        debug = this.add.text(10, 10, '', { font: '10px Arial', fill: '#ffffff' });
+        //debug = this.add.text(10, 10, '', { font: '10px Arial', fill: '#ffffff' });
         
     },
 
