@@ -16,7 +16,6 @@ var Raycer = new Phaser.Class({
 
     preload: function ()
     {
-        this.load.spritesheet('explosion', 'sprites/explosion.png',{ frameWidth: 32, frameHeight: 32 });
 
     },
 
@@ -25,13 +24,7 @@ var Raycer = new Phaser.Class({
 
         
 
-        this.anims.create({
-                key: 'fireball_animation',
-                frames: this.anims.generateFrameNumbers('explosion'),
-                frameRate: 20,
-                repeat: 0
-                //yoyo: true
-            });    
+            
 
         
         

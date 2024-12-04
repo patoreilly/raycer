@@ -67,7 +67,6 @@ var Setup = new Phaser.Class({
         this.load.image('background5', 'sprites/backscroll5.png');
         this.load.image('background6', 'sprites/backscroll6.png');
 
-        this.load.image('ground', 'sprites/ground_sand.png')
         this.load.image('raycer_cycle', 'sprites/raycer_cycle.png');
         this.load.image('raycer_cycle_L1', 'sprites/raycer_cycle_L1.png');
         this.load.image('raycer_cycle_R1', 'sprites/raycer_cycle_R1.png');
@@ -132,7 +131,7 @@ var Setup = new Phaser.Class({
         this.load.image('tree15', 'sprites/tree15.png');
         this.load.image('tree16', 'sprites/tree16.png');
         
-        
+        this.load.spritesheet('explosion', 'sprites/explosion.png',{ frameWidth: 32, frameHeight: 32 });
         
 
 
@@ -276,7 +275,14 @@ var Setup = new Phaser.Class({
 
         startFlag=false;
 
-        
+        // pre-load animations used in other scenes
+        this.anims.create({
+                key: 'fireball_animation',
+                frames: this.anims.generateFrameNumbers('explosion'),
+                frameRate: 20,
+                repeat: 0
+                //yoyo: true
+            });
         
 
         
