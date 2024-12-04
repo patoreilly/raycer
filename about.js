@@ -29,6 +29,8 @@ var About = new Phaser.Class({
         this.access_menu = this.add.image(310,10,'a_menu').setAlpha(1).setInteractive();
         this.access_menu.on('pointerdown', function () { var menus = this.scene.get('menus'); menus.displayHideMenu(); this.scene.setVisible(false, 'about');} , this);
 
+        this.input.keyboard.on('keydown', function (){ this.scene.setVisible(false, 'about'); }, this);
+
         var nt_config1 = {
         image: 'Hat Trick Hero',
         width: 8,

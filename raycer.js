@@ -373,16 +373,16 @@ var Raycer = new Phaser.Class({
         this.scenery_group[0] = this.add.group();
         for (var i = 0; i < 50; i++)
         {
-            scenery_sprite = this.add.image(0,0,'rock'+Phaser.Math.Between(1,4)).setOrigin(.5,1.0).setVisible(false);
-            scenery_sprite.label = 'rock';
+            scenery_sprite = this.add.image(0,0,'tree'+Phaser.Math.Between(4,9)).setOrigin(.5,1.0).setVisible(false);
+            scenery_sprite.label = 'tree';
             scenery_sprite.location = {distance:Phaser.Math.Between(100,this.fTrackDistance-100), orientation:'left'};
             var spriteDepth = 100;//-Math.floor(100*(scenery_sprite.location.distance/this.fTrackDistance));
             scenery_sprite.setDepth(spriteDepth);
 
             this.scenery_group[0].add(scenery_sprite);
 
-            scenery_sprite = this.add.image(0,0,'rock'+Phaser.Math.Between(1,4)).setOrigin(.5,1.0).setVisible(false);
-            scenery_sprite.label = 'rock';
+            scenery_sprite = this.add.image(0,0,'tree'+Phaser.Math.Between(4,9)).setOrigin(.5,1.0).setVisible(false);
+            scenery_sprite.label = 'tree';
             scenery_sprite.location = {distance:Phaser.Math.Between(100,this.fTrackDistance-100), orientation:'right'};
             var spriteDepth = 100 - Math.floor(100*(scenery_sprite.location.distance/this.fTrackDistance));
             scenery_sprite.setDepth(spriteDepth);
@@ -391,7 +391,7 @@ var Raycer = new Phaser.Class({
         }
 
         this.scenery_group[1] = this.add.group();
-        for (var i = 0; i < 50; i++)
+        for (var i = 0; i < 20; i++)
         {
             scenery_sprite = this.add.image(0,0,'fern'+Phaser.Math.Between(1,8)).setOrigin(.5,1.0).setVisible(false);
             scenery_sprite.label = 'fern';
@@ -409,6 +409,27 @@ var Raycer = new Phaser.Class({
 
             this.scenery_group[1].add(scenery_sprite);
         }
+
+        for (var i = 0; i < 30; i++)
+        {
+            scenery_sprite = this.add.image(0,0,'rock'+Phaser.Math.Between(1,4)).setOrigin(.5,1.0).setVisible(false);
+            scenery_sprite.label = 'rock';
+            scenery_sprite.location = {distance:Phaser.Math.Between(100,this.fTrackDistance-100), orientation:'left'};
+            var spriteDepth = 100;//-Math.floor(100*(scenery_sprite.location.distance/this.fTrackDistance));
+            scenery_sprite.setDepth(spriteDepth);
+
+            this.scenery_group[1].add(scenery_sprite);
+
+            scenery_sprite = this.add.image(0,0,'rock'+Phaser.Math.Between(1,4)).setOrigin(.5,1.0).setVisible(false);
+            scenery_sprite.label = 'rock';
+            scenery_sprite.location = {distance:Phaser.Math.Between(100,this.fTrackDistance-100), orientation:'right'};
+            var spriteDepth = 100;// - Math.floor(100*(scenery_sprite.location.distance/this.fTrackDistance));
+            scenery_sprite.setDepth(spriteDepth);
+
+            this.scenery_group[1].add(scenery_sprite);
+        }
+
+
 
         this.scenery_group[2] = this.add.group();
         for (var i = 0; i < 50; i++)
@@ -752,7 +773,7 @@ var Raycer = new Phaser.Class({
                 switch (this.background_index)
                 {
                     case 0:
-                        var nGrassColour = Math.sin(80.0 * Math.pow(1.0 - fPerspective, 3) + this.fDistance * .8) > 0.0 ? 'mutedorange' : 'mutedorange2';
+                        var nGrassColour = Math.sin(80.0 * Math.pow(1.0 - fPerspective, 3) + this.fDistance * .8) > 0.0 ? 'green' : 'darkgreen';
                         var nClipColour = Math.sin(40.0 *  Math.pow(1.0 - fPerspective, 3) + this.fDistance) > 0.0 ? 'red' : 'white';
                         break;
 
@@ -1019,8 +1040,11 @@ var Raycer = new Phaser.Class({
 
                     // adjust depth for scenery
                     _sprite.setDepth(nRow-16);
-                    if (_sprite.location.orientation == 'left') _sprite.setPosition(nLeftGrass,nRow).setScale(_spritePerspective*2)
-                        else _sprite.setPosition(nRightGrass,nRow).setScale(_spritePerspective*2)
+
+                    //adjust scaleFactor for first stage only (trees)
+                    var scaleFactor = (thisContext.background_index == 0) ? 1.5 : 2 ;
+                    if (_sprite.location.orientation == 'left') _sprite.setPosition(nLeftGrass,nRow).setScale(_spritePerspective*scaleFactor)
+                        else _sprite.setPosition(nRightGrass,nRow).setScale(_spritePerspective*scaleFactor)
             
                 }
                 else
