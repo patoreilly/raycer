@@ -47,9 +47,14 @@ var Raycer = new Phaser.Class({
         this.fCarPos = 0.0;           // Current car position
         this.fPlayerCurvature = 0.0;          // Accumulation of player curvature
         this.fSpeed = 0.0;            // Current player speed
+        this.fSpeedFactor = 0.025;            // Current gear
+        this.realSpeed = 0.0;           //speed value for display and comparisons
         this.listLapTimes = [0,0,0,0,0];       // List of previous lap times
         this.fCurrentLapTime = 0.0;          // Current lap time
         this.totalRaceTime = 0.0;
+
+        this.playerTotalRaceDistance = 0.0;
+        this.playerRacePlacement;
 
         this.vecTrack = []; // Track sections, sharpness of bend, length of section
 
@@ -141,14 +146,37 @@ var Raycer = new Phaser.Class({
 
         
         
-        this.raycer_cycle_sprite = this.add.image(0,0,'raycer_cycle').setDepth(162);
+        this.raycer_cycle_sprite = this.add.image(0,162,'raycer_cycle').setDepth(162);
+
+
+
+        this.cycleHopTween = this.tweens.add({
+
+            targets: this.raycer_cycle_sprite,
+            y: 150,          
+            ease: 'none',
+            duration: 150,
+            yoyo: 1,
+            repeat: 0,
+            paused: true,
+            // onComplete: function ()
+            // {
+            //     this.fSpeed = .5;
+            //     this.fSpeedFactor = 0.0075;
+            // }
+
+        });
 
         
         //total set of enemy objects
         this.enemy_group = this.add.group();
-        //this.enemy_groupArray = this.enemy_group.getChildren();
+        this.enemy_groupArray = this.enemy_group.getChildren();
 
         var enemy_sprite; //worker just to init sprites in group
+        var sp_rng_low1 = 10;
+        var sp_rng_low2 = 14;
+        var sp_rng_high1 = 20;
+        var sp_rng_high2 = 21;
 
         for (var u=0; u<20; u++)
         {
@@ -156,7 +184,8 @@ var Raycer = new Phaser.Class({
             enemy_sprite.label = 'enemy_cycle';
             enemy_sprite.status = 'alive';
             enemy_sprite.location = {distance:Phaser.Math.Between(10,30), position:(Phaser.Math.Between(-5,5)/10)};
-            enemy_sprite.speed = (Phaser.Math.Between(8,21)/10);
+            enemy_sprite.totalRaceDistance = enemy_sprite.location.distance;
+            enemy_sprite.speed = (Phaser.Math.Between(sp_rng_low1,sp_rng_low2)/10);
             enemy_sprite.lean = function()
             {
                 if (thisContext.fTargetCurvature>.6) this.setTexture('enemy_cycle1_R2');
@@ -169,7 +198,7 @@ var Raycer = new Phaser.Class({
             this.tweens.add({
 
                         targets: enemy_sprite,
-                        speed: (Phaser.Math.Between(8,21)/10),                    
+                        speed: (Phaser.Math.Between(sp_rng_high1,sp_rng_high2)/10),                    
                         ease: 'Sine.easeInOut',
                         duration: 10000,
                         yoyo: true,
@@ -182,7 +211,7 @@ var Raycer = new Phaser.Class({
             this.tweens.add({
 
                         targets: enemy_sprite.location,
-                        position: 0,                    
+                        position: (Phaser.Math.Between(-5,5)/10),                    
                         ease: 'Sine.easeInOut',
                         duration: 3000,
                         yoyo: true,
@@ -201,7 +230,8 @@ var Raycer = new Phaser.Class({
             enemy_sprite.label = 'enemy_cycle';
             enemy_sprite.status = 'alive';
             enemy_sprite.location = {distance:Phaser.Math.Between(10,30), position:(Phaser.Math.Between(-5,5)/10)};
-            enemy_sprite.speed = (Phaser.Math.Between(8,21)/10);
+            enemy_sprite.totalRaceDistance = enemy_sprite.location.distance;
+            enemy_sprite.speed = (Phaser.Math.Between(sp_rng_low1,sp_rng_low2)/10);
             enemy_sprite.lean = function()
             {
                 if (thisContext.fTargetCurvature>.6) this.setTexture('enemy_cycle2_R2');
@@ -214,7 +244,7 @@ var Raycer = new Phaser.Class({
             this.tweens.add({
 
                         targets: enemy_sprite,
-                        speed: (Phaser.Math.Between(8,21)/10),                    
+                        speed: (Phaser.Math.Between(sp_rng_high1,sp_rng_high2)/10),                    
                         ease: 'Sine.easeInOut',
                         duration: 12000,
                         yoyo: true,
@@ -227,7 +257,7 @@ var Raycer = new Phaser.Class({
             this.tweens.add({
 
                         targets: enemy_sprite.location,
-                        position: -0.4,                    
+                        position: (Phaser.Math.Between(-5,5)/10),                    
                         ease: 'Sine.easeInOut',
                         duration: 3000,
                         yoyo: true,
@@ -246,7 +276,8 @@ var Raycer = new Phaser.Class({
             enemy_sprite.label = 'enemy_cycle';
             enemy_sprite.status = 'alive';
             enemy_sprite.location = {distance:Phaser.Math.Between(10,30), position:(Phaser.Math.Between(-5,5)/10)};
-            enemy_sprite.speed = (Phaser.Math.Between(8,21)/10);
+            enemy_sprite.totalRaceDistance = enemy_sprite.location.distance;
+            enemy_sprite.speed = (Phaser.Math.Between(sp_rng_low1,sp_rng_low2)/10);
             enemy_sprite.lean = function()
             {
                 if (thisContext.fTargetCurvature>.6) this.setTexture('enemy_cycle3_R2');
@@ -259,7 +290,7 @@ var Raycer = new Phaser.Class({
             this.tweens.add({
 
                         targets: enemy_sprite,
-                        speed: (Phaser.Math.Between(8,21)/10),                    
+                        speed: (Phaser.Math.Between(sp_rng_high1,sp_rng_high2)/10),                    
                         ease: 'Sine.easeInOut',
                         duration: 15000,
                         yoyo: true,
@@ -272,7 +303,7 @@ var Raycer = new Phaser.Class({
             this.tweens.add({
 
                         targets: enemy_sprite.location,
-                        position: 0.3,                    
+                        position: (Phaser.Math.Between(-5,5)/10),                    
                         ease: 'Sine.easeInOut',
                         duration: 3000,
                         yoyo: true,
@@ -291,7 +322,8 @@ var Raycer = new Phaser.Class({
             enemy_sprite.label = 'enemy_cycle';
             enemy_sprite.status = 'alive';
             enemy_sprite.location = {distance:Phaser.Math.Between(10,30), position:(Phaser.Math.Between(-5,5)/10)};
-            enemy_sprite.speed = (Phaser.Math.Between(8,21)/10);
+            enemy_sprite.totalRaceDistance = enemy_sprite.location.distance;
+            enemy_sprite.speed = (Phaser.Math.Between(sp_rng_low1,sp_rng_low2)/10);
             enemy_sprite.lean = function()
             {
                 if (thisContext.fTargetCurvature>.6) this.setTexture('enemy_cycle4_R2');
@@ -304,7 +336,7 @@ var Raycer = new Phaser.Class({
             this.tweens.add({
 
                         targets: enemy_sprite,
-                        speed: (Phaser.Math.Between(8,21)/10),                    
+                        speed: (Phaser.Math.Between(sp_rng_high1,sp_rng_high2)/10),                    
                         ease: 'Sine.easeInOut',
                         duration: 8000,
                         yoyo: true,
@@ -317,7 +349,7 @@ var Raycer = new Phaser.Class({
             this.tweens.add({
 
                         targets: enemy_sprite.location,
-                        position: .4,                    
+                        position: (Phaser.Math.Between(-5,5)/10),                    
                         ease: 'Sine.easeInOut',
                         duration: 3000,
                         yoyo: true,
@@ -370,6 +402,7 @@ var Raycer = new Phaser.Class({
         this.scenery_group =[];
         var scenery_sprite; //worker just to init sprites in group
 
+        //
         this.scenery_group[0] = this.add.group();
         for (var i = 0; i < 50; i++)
         {
@@ -389,7 +422,7 @@ var Raycer = new Phaser.Class({
 
             this.scenery_group[0].add(scenery_sprite);
         }
-
+        //
         this.scenery_group[1] = this.add.group();
         for (var i = 0; i < 20; i++)
         {
@@ -409,7 +442,6 @@ var Raycer = new Phaser.Class({
 
             this.scenery_group[1].add(scenery_sprite);
         }
-
         for (var i = 0; i < 30; i++)
         {
             scenery_sprite = this.add.image(0,0,'rock'+Phaser.Math.Between(1,4)).setOrigin(.5,1.0).setVisible(false);
@@ -428,30 +460,8 @@ var Raycer = new Phaser.Class({
 
             this.scenery_group[1].add(scenery_sprite);
         }
-
-
-
-        this.scenery_group[2] = this.add.group();
-        for (var i = 0; i < 50; i++)
-        {
-            scenery_sprite = this.add.image(0,0,'plant'+Phaser.Math.Between(3,6)).setOrigin(.5,1.0).setVisible(false);
-            scenery_sprite.label = 'plant';
-            scenery_sprite.location = {distance:Phaser.Math.Between(100,this.fTrackDistance-100), orientation:'left'};
-            var spriteDepth = 100;//-Math.floor(100*(scenery_sprite.location.distance/this.fTrackDistance));
-            scenery_sprite.setDepth(spriteDepth);
-
-            this.scenery_group[2].add(scenery_sprite);
-
-            scenery_sprite = this.add.image(0,0,'plant'+Phaser.Math.Between(3,6)).setOrigin(.5,1.0).setVisible(false);
-            scenery_sprite.label = 'plant';
-            scenery_sprite.location = {distance:Phaser.Math.Between(100,this.fTrackDistance-100), orientation:'right'};
-            var spriteDepth = 100;// - Math.floor(100*(scenery_sprite.location.distance/this.fTrackDistance));
-            scenery_sprite.setDepth(spriteDepth);
-
-            this.scenery_group[2].add(scenery_sprite);
-        }
-
-        this.scenery_group[3] = this.add.group();        
+        //
+        this.scenery_group[2] = this.add.group();        
         for (var i = 0; i < 50; i++)
         {
             scenery_sprite = this.add.image(0,0,'tree'+Phaser.Math.Between(16,16)).setOrigin(.5,1.0).setVisible(false);
@@ -460,7 +470,7 @@ var Raycer = new Phaser.Class({
             var spriteDepth = 100;//-Math.floor(100*(scenery_sprite.location.distance/this.fTrackDistance));
             scenery_sprite.setDepth(spriteDepth);
 
-            this.scenery_group[3].add(scenery_sprite);
+            this.scenery_group[2].add(scenery_sprite);
 
             scenery_sprite = this.add.image(0,0,'tree'+Phaser.Math.Between(16,16)).setOrigin(.5,1.0).setVisible(false);
             scenery_sprite.label = 'tree';
@@ -468,9 +478,29 @@ var Raycer = new Phaser.Class({
             var spriteDepth = 100;// - Math.floor(100*(scenery_sprite.location.distance/this.fTrackDistance));
             scenery_sprite.setDepth(spriteDepth);
 
+            this.scenery_group[2].add(scenery_sprite);
+        }
+        //
+        this.scenery_group[3] = this.add.group();
+        for (var i = 0; i < 50; i++)
+        {
+            scenery_sprite = this.add.image(0,0,'plant'+Phaser.Math.Between(3,6)).setOrigin(.5,1.0).setVisible(false);
+            scenery_sprite.label = 'plant';
+            scenery_sprite.location = {distance:Phaser.Math.Between(100,this.fTrackDistance-100), orientation:'left'};
+            var spriteDepth = 100;//-Math.floor(100*(scenery_sprite.location.distance/this.fTrackDistance));
+            scenery_sprite.setDepth(spriteDepth);
+
+            this.scenery_group[3].add(scenery_sprite);
+
+            scenery_sprite = this.add.image(0,0,'plant'+Phaser.Math.Between(3,6)).setOrigin(.5,1.0).setVisible(false);
+            scenery_sprite.label = 'plant';
+            scenery_sprite.location = {distance:Phaser.Math.Between(100,this.fTrackDistance-100), orientation:'right'};
+            var spriteDepth = 100;// - Math.floor(100*(scenery_sprite.location.distance/this.fTrackDistance));
+            scenery_sprite.setDepth(spriteDepth);
+
             this.scenery_group[3].add(scenery_sprite);
         }
-
+        //
         this.scenery_group[4] = this.add.group();        
         for (var i = 0; i < 50; i++)
         {
@@ -490,7 +520,7 @@ var Raycer = new Phaser.Class({
 
             this.scenery_group[4].add(scenery_sprite);
         }
-
+        //
         this.scenery_group[5] = this.add.group();        
         for (var i = 0; i < 50; i++)
         {
@@ -510,7 +540,7 @@ var Raycer = new Phaser.Class({
 
             this.scenery_group[5].add(scenery_sprite);
         }
-
+        //
         this.scenery_group[6] = this.add.group();        
         for (var i = 0; i < 50; i++)
         {
@@ -530,39 +560,17 @@ var Raycer = new Phaser.Class({
 
             this.scenery_group[6].add(scenery_sprite);
         }
-
-        // for (var i = 0; i < 10; i++)
-        // {
-        //     scenery_sprite = this.add.image(0,0,'atari_sign').setOrigin(0,1.0).setVisible(false);
-        //     scenery_sprite.label = 'atari_sign';
-        //     scenery_sprite.location = {distance:Phaser.Math.Between(100,2200), orientation:'right'};
-        //     var spriteDepth = 100 - Math.floor(100*(scenery_sprite.location.distance/this.fTrackDistance));
-        //     scenery_sprite.setDepth(spriteDepth);
-
-        //     this.scenery_group[3].add(scenery_sprite);
-        // }
+        //
         
 
         /// keyboard input 
         cursors = this.input.keyboard.createCursorKeys();
 
-        
-
         // activates gamepad in this scene
-
         this.input.gamepad.once('down', function (pad, button, index) {
-
-        pad.setAxisThreshold(0.3);
-
-        gamepad = pad;
-
-        }, this);
-        
-        
-
-        
-        
-
+            pad.setAxisThreshold(0.3);
+            gamepad = pad;
+            }, this);
         
         /// launch touch input gui
         if (touchActivated)
@@ -574,13 +582,12 @@ var Raycer = new Phaser.Class({
         this.scene.launch('menus');
         this.scene.launch('title');
         
-        
+
 
         /// mark lap start time
-
         this.lapStartTime = game.loop.now;
         this.raceStartTime = this.lapStartTime;
-        //this.newLapTimeMark = 0;
+
         
 
         /// debug global
@@ -600,18 +607,18 @@ var Raycer = new Phaser.Class({
         this.fCurrentLapTime = (game.loop.now - this.lapStartTime)/1000;
         this.totalRaceTime = (game.loop.now - this.raceStartTime)/1000;
 
-        //instead of fElapsedTime, fSpeedFactor will scale range of throttling (which effectively represents gear shifting for lower to higher ranges of speed)
+        //instead of fElapsedTime, this.fSpeedFactor will scale range of throttling (which effectively represents gear shifting for lower to higher ranges of speed)
 
-        //var fSpeedFactor = .0075; //1st gear
-        //var fSpeedFactor = .0125; //2nd gear
-        var fSpeedFactor = .025; //3rd gear
+        //this.fSpeedFactor = .0075; //1st gear
+        //this.fSpeedFactor = .0125; //2nd gear
+        //this.fSpeedFactor = .025; //3rd gear
 
         // Handle control input
         var nCarDirection = 0;
         
         if (this.raycer_mode == 'demo')
         {
-            this.fSpeed += 2.0 * fSpeedFactor;
+            this.fSpeed += 2.0 * this.fSpeedFactor;
         }
         else
         {
@@ -631,21 +638,21 @@ var Raycer = new Phaser.Class({
             
 
             if (cursors.up.isDown || guiUp || gamepad.up)
-                this.fSpeed += 2.0 * fSpeedFactor;
+                this.fSpeed += 2.0 * this.fSpeedFactor;
             else
-                this.fSpeed -= 1.0 * fSpeedFactor;
+                this.fSpeed -= 1.0 * this.fSpeedFactor;
 
             // Car Curvature is accumulated left/right input, but inversely proportional to speed
             // i.e. it is harder to turn at high speed
             if (cursors.left.isDown || guiLeft || gamepad.left)
             {
-                this.fPlayerCurvature -= 2.0 * fSpeedFactor * (1.0 - this.fSpeed / 2.0);
+                this.fPlayerCurvature -= 2.0 * this.fSpeedFactor * (1.0 - this.fSpeed / 2.0);
                 nCarDirection = -1;
             }
 
             if (cursors.right.isDown || guiRight || gamepad.right)
             {
-                this.fPlayerCurvature += 2.0 * fSpeedFactor * (1.0 - this.fSpeed / 2.0);
+                this.fPlayerCurvature += 2.0 * this.fSpeedFactor * (1.0 - this.fSpeed / 2.0);
                 nCarDirection = +1;
             }
             //end player control
@@ -659,7 +666,7 @@ var Raycer = new Phaser.Class({
         if (this.raycer_mode != 'demo')
         {
             if (Math.abs(this.fPlayerCurvature - this.fTrackCurvature) >= 0.8)
-            this.fSpeed -= 5.0 * fSpeedFactor;
+            this.fSpeed -= 5.0 * this.fSpeedFactor;
         }
         else
         {
@@ -668,20 +675,37 @@ var Raycer = new Phaser.Class({
         
 
         // Clamp Speed
-        if (this.fSpeed < 0.0)  this.fSpeed = 0.0;
-        if (this.fSpeed > 1.0)  this.fSpeed = 1.0;
+        if (this.raycer_mode != 'demo')
+        {
+            if (this.fSpeed < 0.0)  this.fSpeed = 0.0;
+            if (this.fSpeed > 1.025)  this.fSpeed = 1.025;
+        }
+        else
+        {
+            if (this.fSpeed < 0.0)  this.fSpeed = 0.0;
+            if (this.fSpeed > 0.950)  this.fSpeed = 0.950;
+        }
+        
         
         // Move car along track according to car speed
-        this.fDistance += (70.0 * this.fSpeed) * fSpeedFactor;
+        this.fDistance += (70.0 * this.fSpeed) * this.fSpeedFactor;
+        //update player total race distance (7 stages/laps)
+        this.playerTotalRaceDistance += (70.0 * this.fSpeed) * this.fSpeedFactor;
+        //update real speed value
+        this.realSpeed = (70.0 * thisContext.fSpeed) * thisContext.fSpeedFactor;
 
-        //this.fDistance += fSpeedFactor;
+        //this.fDistance += this.fSpeedFactor;
         
         // Get Point on track
         var fOffset = 0.0;
         var nTrackSection = 0;
 
+
+
         // Lap Timing and counting
+
         // this.fCurrentLapTime = fElapsedTime;// - this.newLapTimeMark;
+
         if (this.fDistance >= this.fTrackDistance)
         {
             this.fDistance = 0; // -= this.fTrackDistance;
@@ -715,13 +739,13 @@ var Raycer = new Phaser.Class({
         
         // Interpolate towards target track curvature
         this.fTargetCurvature = this.vecTrack[nTrackSection - 1].curvature;
-        var fTrackCurveDiff = (this.fTargetCurvature - this.fCurvature) * fSpeedFactor * this.fSpeed;
+        var fTrackCurveDiff = (this.fTargetCurvature - this.fCurvature) * this.fSpeedFactor * this.fSpeed;
 
         // Accumulate player curvature
         this.fCurvature += fTrackCurveDiff;
 
         // Accumulate track curvature
-        this.fTrackCurvature += (this.fCurvature) * fSpeedFactor * this.fSpeed;
+        this.fTrackCurvature += (this.fCurvature) * this.fSpeedFactor * this.fSpeed;
 
 
 
@@ -783,13 +807,13 @@ var Raycer = new Phaser.Class({
                         break;
 
                     case 2:
-                        var nGrassColour = Math.sin(80.0 * Math.pow(1.0 - fPerspective, 3) + this.fDistance * .8) > 0.0 ? 'violet' : 'darkviolet';
-                        var nClipColour = Math.sin(40.0 *  Math.pow(1.0 - fPerspective, 3) + this.fDistance) > 0.0 ? 'blue' : 'white';
+                        var nGrassColour = Math.sin(80.0 * Math.pow(1.0 - fPerspective, 3) + this.fDistance * .8) > 0.0 ? 'cyan' : 'darkcyan';
+                        var nClipColour = Math.sin(40.0 *  Math.pow(1.0 - fPerspective, 3) + this.fDistance) > 0.0 ? 'red' : 'white';
                         break;
 
                     case 3:
-                        var nGrassColour = Math.sin(80.0 * Math.pow(1.0 - fPerspective, 3) + this.fDistance * .8) > 0.0 ? 'cyan' : 'darkcyan';
-                        var nClipColour = Math.sin(40.0 *  Math.pow(1.0 - fPerspective, 3) + this.fDistance) > 0.0 ? 'red' : 'white';
+                        var nGrassColour = Math.sin(80.0 * Math.pow(1.0 - fPerspective, 3) + this.fDistance * .8) > 0.0 ? 'violet' : 'darkviolet';
+                        var nClipColour = Math.sin(40.0 *  Math.pow(1.0 - fPerspective, 3) + this.fDistance) > 0.0 ? 'blue' : 'white';
                         break;
 
                     case 4:
@@ -808,7 +832,7 @@ var Raycer = new Phaser.Class({
                         break;
                 }
 
-                if (this.background_index==3)
+                if (this.background_index==2)
                 {
                     // Draw the row segments with sand
                     if (x >= 0 && x < nLeftSand)
@@ -867,18 +891,20 @@ var Raycer = new Phaser.Class({
 
         if (this.raycer_mode != 'demo')
         {
+            var currentY = this.raycer_cycle_sprite.y;
+
             switch (nCarDirection)
             {
             case 0:
-                this.raycer_cycle_sprite.setPosition(nCarPos,162).setTexture('raycer_cycle');
+                this.raycer_cycle_sprite.setPosition(nCarPos,currentY).setTexture('raycer_cycle');
                 break;
 
             case +1:
-                this.raycer_cycle_sprite.setPosition(nCarPos,162).setTexture('raycer_cycle_R2');
+                this.raycer_cycle_sprite.setPosition(nCarPos,currentY).setTexture('raycer_cycle_R2');
                 break;
 
             case -1:
-                this.raycer_cycle_sprite.setPosition(nCarPos,162).setTexture('raycer_cycle_L2');
+                this.raycer_cycle_sprite.setPosition(nCarPos,currentY).setTexture('raycer_cycle_L2');
                 break;
             }
         }
@@ -903,6 +929,8 @@ var Raycer = new Phaser.Class({
                 {
                     _sprite.lean();
                     _sprite.location.distance += _sprite.speed;
+                    _sprite.totalRaceDistance += _sprite.speed;
+
                     if (_sprite.location.distance>=thisContext.fTrackDistance-50) _sprite.location.distance = -50;
 
                     if ( _sprite.location.distance<thisContext.fDistance && _sprite.location.distance>thisContext.fDistance-76 )
@@ -928,11 +956,10 @@ var Raycer = new Phaser.Class({
                         _sprite.setDepth(nRow);
                         _sprite.setPosition(_spriteX,nRow).setScale(_spritePerspective*1.7)
 
-                        //var rRow = Math.round(nRow);
+                        //collision detection
                         if ( Phaser.Math.Fuzzy.Equal(_spriteX,nCarPos,7.0) && Phaser.Math.Fuzzy.Equal(nRow,162,5.0) ) 
                         {
-                            var realSpeed = (70.0 * thisContext.fSpeed) * fSpeedFactor;
-                            if (_sprite.speed<realSpeed)
+                            if (_sprite.speed<thisContext.realSpeed)
                             {
                                 //alert('collision! - you win');
                                 _sprite.status = 'killed';
@@ -973,10 +1000,13 @@ var Raycer = new Phaser.Class({
 
             } );
 
-
-
+        
         // Draw road sprites
-        this.road_group.children.iterate( 
+
+        if (this.raycer_mode != 'demo')
+        {
+
+            this.road_group.children.iterate( 
             function(_sprite)
             {
                 if ( _sprite.location.distance<thisContext.fDistance && _sprite.location.distance>thisContext.fDistance-60 )
@@ -995,6 +1025,49 @@ var Raycer = new Phaser.Class({
                     
                     _sprite.setDepth(nRow);
                     _sprite.setPosition(_spriteX,nRow).setScale(_spritePerspective);
+
+                    //collision detection
+                    if ( Phaser.Math.Fuzzy.Equal(_spriteX,nCarPos,7.0) && Phaser.Math.Fuzzy.Equal(nRow,162,5.0) && thisContext.raycer_mode) 
+                    {
+
+                        if (!thisContext.cycleHopTween.isPlaying())
+                        {
+
+                            thisContext.cycleHopTween = thisContext.tweens.add({
+
+                                targets: thisContext.raycer_cycle_sprite,
+                                y: 150,          
+                                ease: 'none',
+                                duration: 150,
+                                yoyo: 1,
+                                repeat: 0,
+                                paused: false,
+                                
+                                onComplete: function ()
+                                {
+                                    //thisContext.fSpeed = .5;
+
+                                    thisContext.tweens.add({
+                                        targets: thisContext,
+                                        fSpeedFactor: .0075,
+                                        ease: 'Sine.EaseInOut',
+                                        duration: 500,
+                                        yoyo: 1,
+                                        repeat: 0,
+                                        onComplete: function ()
+                                        {
+                                            thisContext.fSpeedFactor = .025;
+                                        }
+                                    });
+                                }
+
+                            });
+
+                        }
+
+                        
+                        
+                    }
                     
                 }
                 else
@@ -1004,6 +1077,7 @@ var Raycer = new Phaser.Class({
 
             } );
 
+        }
 
 
         // Draw scenery sprites
@@ -1053,6 +1127,25 @@ var Raycer = new Phaser.Class({
                 }
 
             } );
+
+
+        //sort raycers into current race standings based on total distance travelled
+        var raycerDistances = [];
+        
+        for (var i = 0; i < this.enemy_groupArray.length; i++)
+        {
+            if (this.enemy_groupArray[i].status == 'alive') 
+            {
+                raycerDistances.push( {type:"enemy", distance: this.enemy_groupArray[i].totalRaceDistance} );
+            }  
+        }
+
+        raycerDistances.push( {type:"player", distance: this.playerTotalRaceDistance-50} );
+
+        raycerDistances.sort( function(a,b){return b.distance - a.distance} );
+
+        this.playerRacePlacement = raycerDistances.findIndex( function getPlayerIndex(value,index,array) { return value.type == "player"}) + 1;
+        
 
         //var debugt = [];
                 
