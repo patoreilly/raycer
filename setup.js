@@ -134,11 +134,10 @@ var Setup = new Phaser.Class({
         this.load.spritesheet('explosion', 'sprites/explosion.png',{ frameWidth: 32, frameHeight: 32 });
         
 
-
-        for (var l = 0; l < audioList.length; l++)
+        // load audio list maintained in globals.js
+        for (var i = 0; i < audioList.length; i++)
         {
-            this.load.binary(audioList[l], 'audio/'+audioList[l]);
-            //files.push(wallList[j]);
+            this.load.binary(audioList[i], 'audio/'+audioList[i]);
         }
 
 

@@ -170,8 +170,10 @@ var sound_on = [
 ".......2........",
 "................"];
 
-var audioList = [
 
+
+var audioList = [
+'3_Days.sid',
 'Agent_of_Lies.sid',
 'Eighties_Megahit.sid',
 'A_True_Story.sid',

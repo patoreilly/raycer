@@ -29,7 +29,7 @@ var About = new Phaser.Class({
         this.access_menu = this.add.image(310,10,'a_menu').setAlpha(1).setInteractive();
         this.access_menu.on('pointerdown', function () { var menus = this.scene.get('menus'); menus.displayHideMenu(); this.scene.setVisible(false, 'about');} , this);
 
-        this.input.keyboard.on('keydown', function (){ this.scene.setVisible(false, 'about'); }, this);
+        this.input.keyboard.on('keydown', function (){ this.scene.setActive(false, 'about');this.scene.setVisible(false, 'about');this.scene.setActive(true, 'raycer');}, this);
 
         var nt_config1 = {
         image: 'Hat Trick Hero',
@@ -64,21 +64,6 @@ var About = new Phaser.Class({
         this.cache.bitmapFont.add('headtext', Phaser.GameObjects.RetroFont.Parse(this, nt_config3));
         this.cache.bitmapFont.add('subtext', Phaser.GameObjects.RetroFont.Parse(this, nt_config1));
         this.cache.bitmapFont.add('foottext', Phaser.GameObjects.RetroFont.Parse(this, nt_config2));
-
-        // var text0 = this.add.dynamicBitmapText(0, 0, 'headtext', 'DragonFLY').setOrigin(0).setScale(1).setPosition(4,4).setDepth(200);
-        // var text1 = this.add.dynamicBitmapText(0, 0, 'headtext', '          v 0.4').setOrigin(0).setScale(1).setPosition(4,4).setDepth(200);
-        // var text2 = this.add.dynamicBitmapText(0, 0, 'headtext', 'presents...').setOrigin(0).setScale(1).setPosition(4,14).setDepth(200);
-
-        // var racertitle = this.add.image(122, -5, 'raycer_title').setOrigin(0).setScale(.6);
-
-        // this.tweens.add({
-        //     targets: racertitle,
-        //     alpha: .6,
-        //     ease: 'Sine.easeInOut',
-        //     duration: 600,
-        //     yoyo: true,
-        //     repeat: -1
-        // });
 
         var text3 = this.add.dynamicBitmapText(0, 0, 'subtext', "Game Design:").setOrigin(1,1).setScale(1).setRightAlign().setPosition(150,50).setDepth(100);
         var text4 = this.add.dynamicBitmapText(0, 0, 'subtext', "Coding Credits:").setOrigin(1,1).setScale(1).setRightAlign().setPosition(150,100).setDepth(100);

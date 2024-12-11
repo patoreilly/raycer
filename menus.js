@@ -437,6 +437,7 @@ var Menus = new Phaser.Class({
 
             case 3:
                 this.displayHideMenu();
+                this.scene.setActive(false, 'raycer');
                 this.scene.launch('about');
 
                 break;
@@ -472,15 +473,14 @@ var Menus = new Phaser.Class({
     startNewGame: function()
     {
         var raycer = this.scene.get('raycer');
-        raycer.raycer_mode='game';
+        raycer.newgame();
         this.scene.launch('hud');
     },
     startDemo: function()
     {
         var raycer = this.scene.get('raycer');
-        raycer.raycer_mode='demo';
+        raycer.newdemo();
         this.scene.launch('hud');
-
     },
 
     update: function()
