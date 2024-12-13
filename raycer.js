@@ -16,11 +16,75 @@ var Raycer = new Phaser.Class({
 
     preload: function ()
     {
+        this.load.audio('enemy_crash', 'audio/enemy_crash.ogg');
+        this.load.audio('enemy_whoop', 'audio/enemy_whoop.ogg');
+        this.load.audio('enemy_pain', 'audio/enemy_pain.ogg');
+
+        this.load.audio('player_smbump', 'audio/player_smbump.ogg');
+        this.load.audio('player_lgbump', 'audio/player_lgbump.ogg');
+        this.load.audio('player_pain', 'audio/player_pain.ogg');
+
+        this.load.audio('motor1', 'audio/motor1.ogg');
+        this.load.audio('motor2', 'audio/motor2.ogg');
+        this.load.audio('motor3', 'audio/motor3.ogg');
+
+        this.load.image('start_finish', 'sprites/start_finish.png')
+
+
 
     },
 
     create: function ()
-    {  
+    {
+        // this.motor1_fx = this.sound.add('motor1');
+        // this.motor1_fx.play({loop: true});
+
+        this.motor3_fx = this.sound.add('motor3');
+        this.motor3_fx.setRate(.1);
+        this.motor3_fx.play({loop: true});
+
+        this.enemy_crash_fx = this.sound.add('enemy_crash');
+        this.enemy_whoop_fx = this.sound.add('enemy_whoop');
+        this.enemy_pain_fx = this.sound.add('enemy_pain');
+
+        this.player_smbump_fx = this.sound.add('player_smbump');
+        this.player_lgbump_fx = this.sound.add('player_lgbump');
+        this.player_pain_fx = this.sound.add('player_pain');
+
+
+
+
+        // set-up a text canvas with frames for each bitmap char
+
+        // 2x size (16px/char)
+        var textCanvas = this.textures.createCanvas('fontsheet',1520,144);
+        var all_characters = ' !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[|]^_`abcdefghijklmnopqrstuvwxyz{\\}~';
+
+        var myscrimg = this.textures.get('Afterburner').getSourceImage();
+
+        textCanvas.getContext('2d', {willReadFrequently:true}).drawImage(myscrimg,0,0,myscrimg.width,myscrimg.height,0,0,1520,144);
+
+        //textCanvas.drawFrame('Nintendo',0,0,0);
+        
+        var charSize=16;
+
+        for (var b=0;b<textCanvas.height/charSize;b++)
+        {
+            for (var v=0;v<all_characters.length;v++)
+            {
+
+                var thisChar = all_characters.charAt(v);
+
+                //console.log(thisChar);
+
+                textCanvas.add(thisChar+'color'+b, 0, v*charSize, b*charSize, charSize, charSize);
+
+            }
+        }
+
+
+
+        
 
         var thisContext = this;
         this.fTargetCurvature;
@@ -106,16 +170,30 @@ var Raycer = new Phaser.Class({
 
 
 
-        this.textures.generate('chunk', { data: ['2'], pixelWidth: 1});
+        this.start_finish_srcimg = this.textures.get('start_finish').getSourceImage();
+        this.sf_width = this.start_finish_srcimg.width;
+        this.sf_height = this.start_finish_srcimg.height;
+        this.start_finish_buffer = this.textures.createCanvas('sf_buffer', this.sf_width, this.sf_height );
+        this.start_finish_context = this.start_finish_buffer.getContext('2d', {willReadFrequently:true});      
+        this.start_finish_context.drawImage(this.start_finish_srcimg, 0,0,this.sf_width,this.sf_height, 0,0,this.sf_width,this.sf_height);
 
-        this.finishline_sprite = [];
 
-        for (var i=0; i<40; i++)
-        {
-            this.finishline_sprite[i] = this.add.image(0,0,'chunk').setAlpha(1).setOrigin(.5).setDepth(2).setVisible(false);
-        }
+        // template -> thing.buffer.drawFrame('fontsheet',nextChar+'color'+thing.animationData.colorindex,textX*8,textY*8);
+
+        var colorNum = 0;
+        this.start_finish_buffer.drawFrame('fontsheet','S'+'color'+colorNum,1*charSize,8);
+        this.start_finish_buffer.drawFrame('fontsheet','T'+'color'+colorNum,2*charSize,8);
+        this.start_finish_buffer.drawFrame('fontsheet','A'+'color'+colorNum,3*charSize,8);
+        this.start_finish_buffer.drawFrame('fontsheet','G'+'color'+colorNum,4*charSize,8);
+        this.start_finish_buffer.drawFrame('fontsheet','E'+'color'+colorNum,5*charSize,8);
+        this.start_finish_buffer.drawFrame('fontsheet','1'+'color'+colorNum,6*charSize,8);
+        this.start_finish_buffer.refresh();
+
+
+        this.start_finish_sprite = this.add.image(0,0,'sf_buffer').setAlpha(1).setOrigin(.5,1).setDepth(2).setVisible(false);
         
-        this.finishline_sprite[0].distance = 10;
+        
+        this.start_finish_sprite.distance = 10;
 
 
 
@@ -281,6 +359,14 @@ var Raycer = new Phaser.Class({
     
     update: function()
     {
+
+        // this.fx_flag = !this.fx_flag;
+        // if (this.fx_flag) 
+
+        //this.soundfx1.play({loop: false});
+
+
+
         var thisContext=this;
 
               
@@ -412,6 +498,17 @@ var Raycer = new Phaser.Class({
                     thisContext.background_index++;
                     if (thisContext.background_index>6) thisContext.background_index=0;
                     thisContext.background_image.setTexture('background'+thisContext.background_index)
+      
+                    thisContext.start_finish_context.drawImage(thisContext.start_finish_srcimg, 0,0,thisContext.sf_width,thisContext.sf_height, 0,0,thisContext.sf_width,thisContext.sf_height);
+                    var charSize=16;
+                    var colorNum = thisContext.background_index;
+                    thisContext.start_finish_buffer.drawFrame('fontsheet','S'+'color'+colorNum,1*charSize,8);
+                    thisContext.start_finish_buffer.drawFrame('fontsheet','T'+'color'+colorNum,2*charSize,8);
+                    thisContext.start_finish_buffer.drawFrame('fontsheet','A'+'color'+colorNum,3*charSize,8);
+                    thisContext.start_finish_buffer.drawFrame('fontsheet','G'+'color'+colorNum,4*charSize,8);
+                    thisContext.start_finish_buffer.drawFrame('fontsheet','E'+'color'+colorNum,5*charSize,8);
+                    thisContext.start_finish_buffer.drawFrame('fontsheet',(thisContext.background_index+1)+'color'+colorNum,6*charSize,8);
+                    thisContext.start_finish_buffer.refresh();
                 }
             });
         }
@@ -612,7 +709,7 @@ var Raycer = new Phaser.Class({
         }
 
         // finish line
-        var _sprite = this.finishline_sprite[0];
+        var _sprite = this.start_finish_sprite;
          
         if ( _sprite.distance<this.fDistance && _sprite.distance>this.fDistance-60 )
         {
@@ -627,12 +724,14 @@ var Raycer = new Phaser.Class({
             
             var nRow = this.GameHeight / 2 + _spriteY;
 
-            var flWidth = Math.round((0.02 + _spritePerspective * 0.8)*this.GameWidth);
-            var flHeight = Math.round((0.02 + _spritePerspective * 0.2)*this.GameWidth);
+            var roadWidth = 0.02 + _spritePerspective * 0.8;
+            var clipsWidth = roadWidth * 0.3;
+            var flWidth = Math.round( ( roadWidth + clipsWidth ) * this.GameWidth );
+            var flHeight = Math.round((0.02 + _spritePerspective * 0.6)*this.GameWidth);
 
-            this.finishline_sprite[0].setVisible(true);
+            this.start_finish_sprite.setVisible(true);
 
-            this.finishline_sprite[0].setPosition(_spriteX,nRow).setDisplaySize(flWidth,flHeight);
+            this.start_finish_sprite.setPosition(_spriteX,nRow).setDisplaySize(flWidth,flHeight);
 
             // for (var hy=0; hy<flHeight; hy++)
             // {
@@ -653,7 +752,7 @@ var Raycer = new Phaser.Class({
         {
             // for (var i=0; i<40; i++)
             // {
-                this.finishline_sprite[0].setVisible(false);
+                this.start_finish_sprite.setVisible(false);
             // }
             
         }
@@ -703,6 +802,8 @@ var Raycer = new Phaser.Class({
                                 //alert('collision! - you win');
                                 _sprite.status = 'killed';
 
+                                thisContext.enemy_pain_fx.play({loop: false});
+
                                 var xDir = Phaser.Math.Between(0,1) == 0 ? 40 : 280 ;
 
                                 thisContext.tweens.add({
@@ -720,6 +821,7 @@ var Raycer = new Phaser.Class({
                                     {
                                         _sprite.setVisible(false);
                                         thisContext.add.sprite(_sprite.x, _sprite.y, 'explosion').play('fireball_animation').setOrigin(.5).setDepth(200);
+                                        thisContext.enemy_crash_fx.play({loop: false});
                                     }
 
                                 });
@@ -730,6 +832,8 @@ var Raycer = new Phaser.Class({
                                 {
                                     //alert('collision! - you lose');
                                     thisContext.raycer_status = 'hit';
+
+                                    thisContext.player_pain_fx.play({loop: false});
 
                                     var xDir = Phaser.Math.Between(0,1) == 0 ? 40 : 280 ;
                                     thisContext.fPlayerCurvature = xDir == 40 ? thisContext.fTrackCurvature-.8 : thisContext.fTrackCurvature+.8 ;
@@ -815,6 +919,15 @@ var Raycer = new Phaser.Class({
                     //collision detection
                     if ( Phaser.Math.Fuzzy.Equal(_spriteX,nCarPos,7.0) && Phaser.Math.Fuzzy.Equal(nRow,162,5.0) && thisContext.raycer_mode) 
                     {
+
+                        if (_sprite.label == 'bump')
+                        {
+                            thisContext.player_smbump_fx.play({loop: false});
+                        }
+                        else
+                        {
+                            thisContext.player_lgbump_fx.play({loop: false});
+                        }
 
                         if (!thisContext.cycleHopTween.isPlaying())
                         {
