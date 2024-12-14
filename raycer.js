@@ -1070,27 +1070,31 @@ var Raycer = new Phaser.Class({
     {
         var r,g,b;
 
-        if (colorkey=='red') { r=255; g=0; b=0; }
-        if (colorkey=='green') { r=95; g=127; b=15; }
-        if (colorkey=='darkgreen') { r=100; g=135; b=20; }
-        if (colorkey=='blue') { r=0; g=0; b=255; }
-        if (colorkey=='orange') { r=224; g=96; b=0; }
-        if (colorkey=='mutedorange') { r=224; g=128; b=0; }
-        if (colorkey=='mutedorange2') { r=210; g=110; b=0; }
-        if (colorkey=='cyan') { r=0; g=110; b=180; }
-        if (colorkey=='darkcyan') { r=10; g=130; b=220; }
-        if (colorkey=='violet') { r=200; g=0; b=200; }
-        if (colorkey=='darkviolet') { r=255; g=50; b=255; }
-        if (colorkey=='white') { r=255; g=255; b=255; }
-        if (colorkey=='grey') { r=100; g=100; b=120; }
-        if (colorkey=='sand') { r=207; g=168; b=103; }
-        if (colorkey=='darkblue') { r=0; g=0; b=40; }
-        if (colorkey=='darkred') { r=40; g=0; b=0; }
-        if (colorkey=='black') { r=0; g=0; b=0; }
-        if (colorkey=='darkgrey') { r=60; g=60; b=60; }
-        if (colorkey=='yellow') { r=240; g=240; b=20; }
-        if (colorkey=='darkpurple') { r=36; g=26; b=46; }
-        if (colorkey=='purple') { r=55; g=35; b=71; }
+        switch (colorkey)
+        {
+            case 'red':  r=255; g=0; b=0; break;
+            case 'green':  r=95; g=127; b=15; break;
+            case 'darkgreen':  r=100; g=135; b=20; break;
+            case 'blue':  r=0; g=0; b=255; break;
+            case 'orange':  r=224; g=96; b=0; break;
+            case 'mutedorange':  r=224; g=128; b=0; break;
+            case 'mutedorange2':  r=210; g=110; b=0; break;
+            case 'cyan':  r=0; g=110; b=180; break;
+            case 'darkcyan':  r=10; g=130; b=220; break;
+            case 'violet':  r=200; g=0; b=200; break;
+            case 'darkviolet':  r=255; g=50; b=255; break;
+            case 'white':  r=255; g=255; b=255; break;
+            case 'grey':  r=100; g=100; b=120; break;
+            case 'sand':  r=207; g=168; b=103; break;
+            case 'darkblue':  r=0; g=0; b=40; break;
+            case 'darkred':  r=40; g=0; b=0; break;
+            case 'black':  r=0; g=0; b=0; break;
+            case 'darkgrey':  r=60; g=60; b=60; break;
+            case 'yellow':  r=240; g=240; b=20; break;
+            case 'darkpurple':  r=36; g=26; b=46; break;
+            case 'purple':  r=55; g=35; b=71; break;
+        }
+
 
         var bytesPerPixel=4;
         var targetIndex=(this.gamedisplay.buffer.width*bytesPerPixel*ypos) + (bytesPerPixel*xpos);     
