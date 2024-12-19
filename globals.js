@@ -27,7 +27,7 @@ var config = {
     audio: {
         disableWebAudio: true
     },
-    scene: [Setup, Raycer, Hud, Menus, Touchgui, About, Title ]
+    scene: [Setup, Raycer, Hud, Menus, Touchgui, About, Title, Gameover ]
 };
 
 var game = new Phaser.Game(config);
@@ -47,6 +47,7 @@ var hsvindex=0;
 var menu_mode=true;
 
 var sound_enabled;
+var fullscreen_enabled=false;
 var music;
 var SIDplayer;
 var audioIndex=0;
@@ -173,24 +174,24 @@ var sound_on = [
 
 
 var audioList = [
+
 '3_Days.sid',
 'Agent_of_Lies.sid',
-'Eighties_Megahit.sid',
-'A_True_Story.sid',
-'Matrix_01.sid',
-'Gorilla.sid',
-'Methane_01.sid',
-'GULBdata.sid',
-'Long_Train_Running.sid',
-'Lumina.sid',
-'New_Blood.sid',
-'One_Must_Fall_2097.sid',
 'Glowtones.sid',
-'Gamma_9_Sound.sid',
-'Hearesy.sid',
-'Helikopter.sid',
+'Matrix_01.sid',
+'New_Blood.sid',
+'Lumina.sid',
+'GULBdata.sid',
+'Gorilla.sid',
+'One_Must_Fall_2097.sid',
 'Holocaust_Intro.sid',
-'Jamaica_10_intro.sid'
+'Jamaica_10_intro.sid',
+'Methane_01.sid',
+'Long_Train_Running.sid',
+'Helikopter.sid',
+'A_True_Story.sid',
+'Eighties_Megahit.sid'
+
 ];
 
 var palette_raycer = {

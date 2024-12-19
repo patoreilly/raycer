@@ -16,19 +16,7 @@ var Raycer = new Phaser.Class({
 
     preload: function ()
     {
-        this.load.audio('enemy_crash', 'audio/enemy_crash.ogg');
-        this.load.audio('enemy_whoop', 'audio/enemy_whoop.ogg');
-        this.load.audio('enemy_pain', 'audio/enemy_pain.ogg');
-
-        this.load.audio('player_smbump', 'audio/player_smbump.ogg');
-        this.load.audio('player_lgbump', 'audio/player_lgbump.ogg');
-        this.load.audio('player_pain', 'audio/player_pain.ogg');
-
-        this.load.audio('motor1', 'audio/motor1.ogg');
-        this.load.audio('motor2', 'audio/motor2.ogg');
-        this.load.audio('motor3', 'audio/motor3.ogg');
-
-        this.load.image('start_finish', 'sprites/start_finish.png')
+        
 
 
 
@@ -39,9 +27,9 @@ var Raycer = new Phaser.Class({
         // this.motor1_fx = this.sound.add('motor1');
         // this.motor1_fx.play({loop: true});
 
-        this.motor3_fx = this.sound.add('motor3');
-        this.motor3_fx.setRate(.1);
-        this.motor3_fx.play({loop: true});
+        //this.motor3_fx = this.sound.add('motor3');
+        //this.motor3_fx.setRate(.1);
+        //this.motor3_fx.play({loop: true});
 
         this.enemy_crash_fx = this.sound.add('enemy_crash');
         this.enemy_whoop_fx = this.sound.add('enemy_whoop');
@@ -94,7 +82,10 @@ var Raycer = new Phaser.Class({
         this.raycer_status = 'normal';
 
         this.background_index = 0;
-        this.total_backgrounds = 4;
+        this.gameover = 0;
+        this.race_finishers = [];
+        this.playerFinishTime = 0;
+        this.finalStanding = 0;
 
         this.fDistance = 50.0;        // Distance car has travelled around track in 'meters'
         this.fCurvature = 0.0;        // Current track curvature, lerped between track sections
@@ -161,8 +152,16 @@ var Raycer = new Phaser.Class({
 
         // init images of background & gamedisplay, cycle sprite, obstacles, scenery, enemies, starting line
 
+        
+
+        //for parallax effect (stage 1 only)
+        this.background_image2 = this.add.image(0,0,'background0a').setOrigin(0).setScale(1);
+        this.background_arc2 = 0;
+
         this.background_image = this.add.image(0,0,'background0').setOrigin(0).setScale(1);
         this.background_arc = 0;
+
+
 
         this.add.image(0,this.GameHeight/2,'gamedisplaycanvas').setOrigin(0).setScale(1).setDepth(1);
 
@@ -177,6 +176,13 @@ var Raycer = new Phaser.Class({
         this.start_finish_context = this.start_finish_buffer.getContext('2d', {willReadFrequently:true});      
         this.start_finish_context.drawImage(this.start_finish_srcimg, 0,0,this.sf_width,this.sf_height, 0,0,this.sf_width,this.sf_height);
 
+        // this.checkered_srcimg = this.textures.get('checkered').getSourceImage();
+        // this.ch_width = this.checkered_srcimg.width;
+        // this.ch_height = this.checkered_srcimg.height;
+        // this.checkered_buffer = this.textures.createCanvas('ch_buffer', this.ch_width, this.ch_height );
+        // this.checkered_context = this.checkered_buffer.getContext('2d', {willReadFrequently:true});      
+        // this.checkered_context.drawImage(this.checkered_srcimg, 0,0,this.ch_width,this.ch_height, 0,0,this.ch_width,this.ch_height);
+
 
         // template -> thing.buffer.drawFrame('fontsheet',nextChar+'color'+thing.animationData.colorindex,textX*8,textY*8);
 
@@ -187,16 +193,14 @@ var Raycer = new Phaser.Class({
         this.start_finish_buffer.drawFrame('fontsheet','G'+'color'+colorNum,4*charSize,8);
         this.start_finish_buffer.drawFrame('fontsheet','E'+'color'+colorNum,5*charSize,8);
         this.start_finish_buffer.drawFrame('fontsheet','1'+'color'+colorNum,6*charSize,8);
-        this.start_finish_buffer.refresh();
-
 
         this.start_finish_sprite = this.add.image(0,0,'sf_buffer').setAlpha(1).setOrigin(.5,1).setDepth(2).setVisible(false);
         
-        
-        this.start_finish_sprite.distance = 10;
+        this.start_finish_sprite.distance = 0;
 
+        this.checkered_sign_sprite = this.add.image(0,0,'checkered_sign').setAlpha(1).setOrigin(.5,1).setDepth(2).setVisible(false);
 
-
+        this.checkered_sign_sprite.distance = 2250;
 
 
         
@@ -307,12 +311,26 @@ var Raycer = new Phaser.Class({
         //redraw background0
         this.background_image.setTexture('background0');
 
+        //redraw start_finish with stage1
+        this.start_finish_context.drawImage(this.start_finish_srcimg, 0,0,this.sf_width,this.sf_height, 0,0,this.sf_width,this.sf_height);
+        var charSize=16;
+        var colorNum = 0;
+        this.start_finish_buffer.drawFrame('fontsheet','S'+'color'+colorNum,1*charSize,8);
+        this.start_finish_buffer.drawFrame('fontsheet','T'+'color'+colorNum,2*charSize,8);
+        this.start_finish_buffer.drawFrame('fontsheet','A'+'color'+colorNum,3*charSize,8);
+        this.start_finish_buffer.drawFrame('fontsheet','G'+'color'+colorNum,4*charSize,8);
+        this.start_finish_buffer.drawFrame('fontsheet','E'+'color'+colorNum,5*charSize,8);
+        this.start_finish_buffer.drawFrame('fontsheet','1'+'color'+colorNum,6*charSize,8);
+
         // reset globals
         this.raycer_mode = 'game';
         this.raycer_status = 'normal';
 
         this.background_index = 0;
-        this.total_backgrounds = 4;
+        this.gameover = 0;
+        this.race_finishers = [];
+        this.playerFinishTime = 0;
+        this.finalStanding = 0;
 
         this.fDistance = 50.0;        // Distance car has travelled around track in 'meters'
         this.fCurvature = 0.0;        // Current track curvature, lerped between track sections
@@ -493,22 +511,42 @@ var Raycer = new Phaser.Class({
                 yoyo: 1,
                 repeat: 0,
                 paused: false,
+                onStart: function()
+                {
+                    var bIndex = thisContext.background_index;
+                    bIndex++;
+                    if (bIndex<7)
+                    {
+                        thisContext.start_finish_context.drawImage(thisContext.start_finish_srcimg, 0,0,thisContext.sf_width,thisContext.sf_height, 0,0,thisContext.sf_width,thisContext.sf_height);
+                        var charSize=16;
+                        var colorNum = bIndex;
+                        thisContext.start_finish_buffer.drawFrame('fontsheet','S'+'color'+colorNum,1*charSize,8);
+                        thisContext.start_finish_buffer.drawFrame('fontsheet','T'+'color'+colorNum,2*charSize,8);
+                        thisContext.start_finish_buffer.drawFrame('fontsheet','A'+'color'+colorNum,3*charSize,8);
+                        thisContext.start_finish_buffer.drawFrame('fontsheet','G'+'color'+colorNum,4*charSize,8);
+                        thisContext.start_finish_buffer.drawFrame('fontsheet','E'+'color'+colorNum,5*charSize,8);
+                        thisContext.start_finish_buffer.drawFrame('fontsheet',(bIndex+1)+'color'+colorNum,6*charSize,8);
+                    }
+                    else
+                    {
+                        thisContext.start_finish_buffer.drawFrame('checkered',0,0,0);
+                    }
+                },
                 onYoyo: function ()
                 {
                     thisContext.background_index++;
-                    if (thisContext.background_index>6) thisContext.background_index=0;
+                    if (thisContext.background_index>6) 
+                    {
+                        //// GAME OVER
+                        thisContext.gameover=1;
+                        thisContext.playerFinishTime = thisContext.totalRaceTime;
+                        thisContext.finalStanding = thisContext.playerRacePlacement;
+                        thisContext.background_index=0;
+                    }
+
                     thisContext.background_image.setTexture('background'+thisContext.background_index)
       
-                    thisContext.start_finish_context.drawImage(thisContext.start_finish_srcimg, 0,0,thisContext.sf_width,thisContext.sf_height, 0,0,thisContext.sf_width,thisContext.sf_height);
-                    var charSize=16;
-                    var colorNum = thisContext.background_index;
-                    thisContext.start_finish_buffer.drawFrame('fontsheet','S'+'color'+colorNum,1*charSize,8);
-                    thisContext.start_finish_buffer.drawFrame('fontsheet','T'+'color'+colorNum,2*charSize,8);
-                    thisContext.start_finish_buffer.drawFrame('fontsheet','A'+'color'+colorNum,3*charSize,8);
-                    thisContext.start_finish_buffer.drawFrame('fontsheet','G'+'color'+colorNum,4*charSize,8);
-                    thisContext.start_finish_buffer.drawFrame('fontsheet','E'+'color'+colorNum,5*charSize,8);
-                    thisContext.start_finish_buffer.drawFrame('fontsheet',(thisContext.background_index+1)+'color'+colorNum,6*charSize,8);
-                    thisContext.start_finish_buffer.refresh();
+                    
                 }
             });
         }
@@ -547,6 +585,33 @@ var Raycer = new Phaser.Class({
             this.background_arc = -(this.background_image.width-this.GameWidth-this.background_arc);   
         
         this.background_image.setPosition(Math.round(this.background_arc),0);
+
+
+
+        //extra parallax layer (stage 1 only)
+
+        if (this.background_index!=0)
+        {
+            this.background_image2.setVisible(false);
+        }
+        else
+        {
+            this.background_image2.setVisible(true);
+            // calculate the movement
+            this.background_arc2 -= this.fCurvature*this.fSpeed*4.5;
+
+            // wrap the image if needed
+            if (this.background_arc2<-this.GameWidth*2)
+                this.background_arc2 = (this.GameWidth*2+this.background_arc2);
+            else if (this.background_arc2>0)
+                this.background_arc2 = -(this.background_image2.width-this.GameWidth-this.background_arc2);   
+            
+            this.background_image2.setPosition(Math.round(this.background_arc2),0);
+        }
+        
+
+
+
 
         // Draw Track - Each row is split into grass, clip-board and track
         for (var y = 0; y < this.GameHeight / 2; y++)
@@ -708,13 +773,11 @@ var Raycer = new Phaser.Class({
             }
         }
 
-        // finish line
+        // start finish sprite (for stages)
         var _sprite = this.start_finish_sprite;
          
         if ( _sprite.distance<this.fDistance && _sprite.distance>this.fDistance-60 )
         {
-            
-
             var _spriteZ = this.fDistance-(_sprite.distance);
             var _spriteY = ((_spriteZ)*(_spriteZ)*(_spriteZ))/2000;
 
@@ -732,30 +795,44 @@ var Raycer = new Phaser.Class({
             this.start_finish_sprite.setVisible(true);
 
             this.start_finish_sprite.setPosition(_spriteX,nRow).setDisplaySize(flWidth,flHeight);
-
-            // for (var hy=0; hy<flHeight; hy++)
-            // {
-            //     var _spritePerspective = _spriteY+hy / (this.GameHeight/2.0);
-            //     var _spriteMiddlePoint = 0.5 + this.fCurvature * Math.pow((1.0 - _spritePerspective), 3);
-            //     var _spriteX = Math.round(_spriteMiddlePoint * this.GameWidth);
-
-            //     var flWidth = Math.round((0.02 + _spritePerspective * 0.8)*this.GameWidth);
-
-            //     this.finishline_sprite[hy].setVisible(true);
-
-            //     this.finishline_sprite[hy].setPosition(_spriteX,nRow+hy).setDisplaySize(flWidth,1);
-            // }
-            
-            
         }
         else
         {
-            // for (var i=0; i<40; i++)
-            // {
-                this.start_finish_sprite.setVisible(false);
-            // }
-            
+            this.start_finish_sprite.setVisible(false);
         }
+
+
+        // finish line (for last stage only)
+        if (this.background_index==6)
+        {
+            var _sprite = this.checkered_sign_sprite;
+         
+            if ( _sprite.distance<this.fDistance && _sprite.distance>this.fDistance-60 )
+            {
+                var _spriteZ = this.fDistance-(_sprite.distance);
+                var _spriteY = ((_spriteZ)*(_spriteZ)*(_spriteZ))/2000;
+
+                var _spritePerspective = _spriteY / (this.GameHeight/2.0);
+                var _spriteMiddlePoint = 0.5 + this.fCurvature * Math.pow((1.0 - _spritePerspective), 3);
+                var _spriteX = Math.round(_spriteMiddlePoint * this.GameWidth);
+                
+                var nRow = this.GameHeight / 2 + _spriteY;
+
+                var roadWidth = 0.02 + _spritePerspective * 0.8;
+                var clipsWidth = roadWidth * 0.3;
+                var flWidth = Math.round( ( roadWidth + clipsWidth ) * this.GameWidth );
+                var flHeight = Math.round((0.02 + _spritePerspective * 0.6)*this.GameWidth);
+
+                this.checkered_sign_sprite.setVisible(true);
+
+                this.checkered_sign_sprite.setPosition(_spriteX,nRow).setDisplaySize(flWidth,flHeight);
+            }
+            else
+            {
+                this.checkered_sign_sprite.setVisible(false);
+            }
+        }
+        
 
 
 
@@ -1027,6 +1104,7 @@ var Raycer = new Phaser.Class({
 
             } );
 
+        
 
         //sort raycers into current race standings based on total distance travelled
         var raycerDistances = [];
@@ -1036,6 +1114,19 @@ var Raycer = new Phaser.Class({
             if (this.enemy_groupArray[i].status == 'alive') 
             {
                 raycerDistances.push( {type:"enemy", distance: this.enemy_groupArray[i].totalRaceDistance} );
+
+
+                //record finish times for enemies
+                if ( this.enemy_groupArray[i].totalRaceDistance>(this.fTrackDistance*7-50) ) //7 stages
+                {
+                    if (!this.enemy_groupArray[i].finished)
+                    {
+                        this.enemy_groupArray[i].finished = true;
+                        this.race_finishers.push( {type:"enemy", label: this.enemy_groupArray[i].label, finishtime: this.totalRaceTime+0.25} );
+                    }
+                    
+                }
+
             }  
         }
 
@@ -1044,6 +1135,28 @@ var Raycer = new Phaser.Class({
         raycerDistances.sort( function(a,b){return b.distance - a.distance} );
 
         this.playerRacePlacement = raycerDistances.findIndex( function getPlayerIndex(value,index,array) { return value.type == "player"}) + 1;
+
+        
+        //when gameover compile final top 10 race standings and launch gameover scene
+        if (this.gameover)
+        {
+            //wait for 10 ememy finishers
+            if (this.race_finishers.length>=10)
+            {
+                //sort player into race finshers
+                this.race_finishers.push( {type:"player", label: 'Raycer X', finishtime: this.playerFinishTime } );
+
+                this.race_finishers.sort( function(a,b){return a.finishtime - b.finishtime} );
+
+                this.gameover = false;
+                this.raycer_mode = 'demo';
+                this.scene.launch('gameover');
+            }
+        }
+
+
+        
+
         
 
         // var debugt = [];
@@ -1118,12 +1231,17 @@ var Raycer = new Phaser.Class({
         var sp_rng_high1 = 20;
         var sp_rng_high2 = 21;
 
+
         for (var u=0; u<20; u++)
         {
+
+
+            //yellow gang
             enemy_sprite = this.add.image(0,0,'enemy_cycle1').setOrigin(.5,.5).setVisible(false);
-            enemy_sprite.label = 'enemy_cycle';
+            enemy_sprite.label = 'yellow gang #'+u;
             enemy_sprite.status = 'alive';
-            enemy_sprite.location = {distance:Phaser.Math.Between(10,30), position:(Phaser.Math.Between(-5,5)/10)};
+            enemy_sprite.finished = false;
+            enemy_sprite.location = {distance:Phaser.Math.Between(10,50), position:(Phaser.Math.Between(-5,5)/10)};
             enemy_sprite.totalRaceDistance = enemy_sprite.location.distance;
             enemy_sprite.speed = (Phaser.Math.Between(sp_rng_low1,sp_rng_low2)/10);
             enemy_sprite.lean = function()
@@ -1166,10 +1284,13 @@ var Raycer = new Phaser.Class({
 
             this.enemy_group.add(enemy_sprite);
 
+
+            //purple gang
             enemy_sprite = this.add.image(0,0,'enemy_cycle2').setOrigin(.5,.5).setVisible(false);
-            enemy_sprite.label = 'enemy_cycle';
+            enemy_sprite.label = 'purple gang #'+u;
             enemy_sprite.status = 'alive';
-            enemy_sprite.location = {distance:Phaser.Math.Between(10,30), position:(Phaser.Math.Between(-5,5)/10)};
+            enemy_sprite.finished = false;
+            enemy_sprite.location = {distance:Phaser.Math.Between(10,50), position:(Phaser.Math.Between(-5,5)/10)};
             enemy_sprite.totalRaceDistance = enemy_sprite.location.distance;
             enemy_sprite.speed = (Phaser.Math.Between(sp_rng_low1,sp_rng_low2)/10);
             enemy_sprite.lean = function()
@@ -1212,10 +1333,13 @@ var Raycer = new Phaser.Class({
 
             this.enemy_group.add(enemy_sprite);
 
+
+            //red gang
             enemy_sprite = this.add.image(0,0,'enemy_cycle3').setOrigin(.5,.5).setVisible(false);
-            enemy_sprite.label = 'enemy_cycle';
+            enemy_sprite.label = 'red gang #'+u;
             enemy_sprite.status = 'alive';
-            enemy_sprite.location = {distance:Phaser.Math.Between(10,30), position:(Phaser.Math.Between(-5,5)/10)};
+            enemy_sprite.finished = false;
+            enemy_sprite.location = {distance:Phaser.Math.Between(10,50), position:(Phaser.Math.Between(-5,5)/10)};
             enemy_sprite.totalRaceDistance = enemy_sprite.location.distance;
             enemy_sprite.speed = (Phaser.Math.Between(sp_rng_low1,sp_rng_low2)/10);
             enemy_sprite.lean = function()
@@ -1258,10 +1382,13 @@ var Raycer = new Phaser.Class({
 
             this.enemy_group.add(enemy_sprite);
 
+
+            //green gang
             enemy_sprite = this.add.image(0,0,'enemy_cycle4').setOrigin(.5,.5).setVisible(false);
-            enemy_sprite.label = 'enemy_cycle';
+            enemy_sprite.label = 'green gang #'+u;
             enemy_sprite.status = 'alive';
-            enemy_sprite.location = {distance:Phaser.Math.Between(10,30), position:(Phaser.Math.Between(-5,5)/10)};
+            enemy_sprite.finished = false;
+            enemy_sprite.location = {distance:Phaser.Math.Between(10,50), position:(Phaser.Math.Between(-5,5)/10)};
             enemy_sprite.totalRaceDistance = enemy_sprite.location.distance;
             enemy_sprite.speed = (Phaser.Math.Between(sp_rng_low1,sp_rng_low2)/10);
             enemy_sprite.lean = function()

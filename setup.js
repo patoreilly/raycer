@@ -15,43 +15,38 @@ var Setup = new Phaser.Class({
 
     preload: function ()
     {
-        // // load audio assets
+        // load audio assets
 
-        // this.load.audioSprite('sfx', 'audio/horizon6_sounds.json', [
-        // 'audio/horizon6_sounds.ogg',
-        // 'audio/horizon6_sounds.mp3'
-        // ]);
+        this.load.audio('enemy_crash', 'audio/enemy_crash.ogg');
+        this.load.audio('enemy_whoop', 'audio/enemy_whoop.ogg');
+        this.load.audio('enemy_pain', 'audio/enemy_pain.ogg');
 
-        // this.load.audio('theme', [
-        // 'audio/miltonatmidnight.ogg',
-        // 'audio/miltonatmidnight.mp3'
-        // ]);
+        this.load.audio('player_smbump', 'audio/player_smbump.ogg');
+        this.load.audio('player_lgbump', 'audio/player_lgbump.ogg');
+        this.load.audio('player_pain', 'audio/player_pain.ogg');
+
+        // this.load.audio('motor1', 'audio/motor1.ogg');
+        // this.load.audio('motor2', 'audio/motor2.ogg');
+        // this.load.audio('motor3', 'audio/motor3.ogg');
+
+        this.load.image('start_finish', 'sprites/start_finish.png');
+        this.load.image('checkered_sign', 'sprites/checkered_sign.png');
+        this.load.image('checkered', 'sprites/checkered.png');
+
         this.load.script('jsSID', 'jsSID.js');
 
+
         // load gui assets
-
-        // this.load.image('Hat Trick Hero', 'gui/Hat Trick Hero 95 (modified_sm).png');
-
-        // this.load.image('dragonfly_title', 'gui/dragonfly_title.png');
 
         this.load.image('raycer_title', 'gui/raycer_title.png');
 
         this.load.image('Hat Trick Hero', 'gui/Hat Trick Hero 95 (modified).png');
 
         this.load.image('Kaiser Knuckle', 'gui/Kaiser Knuckle (Taito).png');
-        
-
-        //this.load.spritesheet('flybug', 'gui/fly1_sheet1.png',{ frameWidth: 52, frameHeight: 34 });
 
         this.load.image('Afterburner', 'gui/Afterburner (Sega).png');
 
-        // this.load.image('Major Title', 'gui/Major Title (IREM).png');
-
-        //this.load.image('load_scrn_bkgd', 'gui/super-cycle_3.gif');
-
-        ///// testing
         this.load.image('Nintendo', 'gui/Super Mario Bros 3 (Nintendo).png');
-        //////
 
         this.load.image('mousekeys_icon', 'gui/mousekeys_icon.png');
         this.load.image('touch_icon', 'gui/touch_icon.png');
@@ -60,6 +55,8 @@ var Setup = new Phaser.Class({
 
         // load game assets
         this.load.image('background0', 'sprites/backscroll0.png');
+        this.load.image('background0a', 'sprites/backscroll0a.png');
+
         this.load.image('background1', 'sprites/backscroll1.png');
         this.load.image('background2', 'sprites/backscroll2.png');
         this.load.image('background3', 'sprites/backscroll3.png');
@@ -257,6 +254,11 @@ var Setup = new Phaser.Class({
     
     create: function ()
     {
+
+        //create gui textures for use in all scenes
+        this.textures.generate('chunk3', { data: ['D'], pixelWidth: 1});
+        this.textures.generate('a_menu', { data: accessMenuData, pixelWidth: 1});
+
         /// debug global
         debug = this.add.text(160, 100, '', { font: '10px Arial', fill: '#00ff00' });
 
@@ -369,6 +371,7 @@ var Setup = new Phaser.Class({
             screen.orientation.lock('landscape');
             
             touchActivated = true;
+            fullscreen_enabled = true;
 
             // music = this.sound.add('theme');
             // music.play({loop: true});

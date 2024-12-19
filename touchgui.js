@@ -40,9 +40,9 @@ var Touchgui = new Phaser.Class({
         guide_up = this.add.image(280,128,'v_arrow').setAlpha(.5).setDepth(200);
         guide_down = this.add.image(280,168,'v_arrow').toggleFlipY().setAlpha(.5).setDepth(200);
 
-        this.textures.generate('a_menu', { data: accessMenuData, pixelWidth: 1});
+        
         access_menu = this.add.image(310,10,'a_menu').setAlpha(1).setInteractive();
-        access_menu.on('pointerdown', function () { var menus = this.scene.get('menus'); menus.displayHideMenu(); this.scene.setVisible(false, 'about');} , this);
+        access_menu.on('pointerdown', function () { var menus = this.scene.get('menus'); menus.displayHideMenu(); } , this);
 
     },
 

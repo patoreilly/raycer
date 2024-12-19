@@ -55,7 +55,7 @@ var Title = new Phaser.Class({
         this.titlegen.colorswitchindex = 0;
         this.titlegen.resolution = 1.0;
         // spectrum range from pure to white
-        this.titlegen.specrange = 200;
+        this.titlegen.specrange = 170;
 
 
         this.titlegen.displayimg = this.add.image(0, 0,'titlegencanvas').setOrigin(0);
@@ -113,7 +113,7 @@ var Title = new Phaser.Class({
             var greencurrentcolorbit = 0;
             var bluecurrentcolorbit = 0;
             
-            var colors = ['blue','rainbow'];
+            var colors = ['blue','rainbow','checkered','checkered'];
             
                 
             if (game.loop.now>this.timecheck+this.switchtime)  
@@ -184,6 +184,86 @@ var Title = new Phaser.Class({
 
                             //if (blurp) {blurpAdj+=1;}
                         }
+                        else if (this.color=='checkered') 
+                        {
+                            var spectrumNum = 6*thisbar/numbars;
+                            // var specNumbars = numbars/6;
+                            // var intspecnum = Math.round(spectrumNum);
+                            // cb_r=0;cb_g=0;cb_b=0;
+
+                            if (spectrumNum>0 && spectrumNum<1) 
+                            {
+                                if ( Math.floor(x/10) % 2 == 0)
+                                {
+                                    r=0;g=0;b=0;
+                                }
+                                else
+                                {
+                                    r=255;g=255;b=255;
+                                }
+                            }
+                                    
+                            if (spectrumNum>1 && spectrumNum<2)
+                            {
+                                if ( Math.floor(x/10) % 2 == 0)
+                                {
+                                    r=255;g=255;b=255;
+                                }
+                                else
+                                {
+                                    r=0;g=0;b=0;
+                                }
+                            }
+                            if (spectrumNum>2 && spectrumNum<3)
+                            {
+                                if ( Math.floor(x/10) % 2 == 0)
+                                {
+                                    r=0;g=0;b=0;
+                                }
+                                else
+                                {
+                                    r=255;g=255;b=255;
+                                }
+                            }
+                            if (spectrumNum>3 && spectrumNum<4)
+                            {
+                                if ( Math.floor(x/10) % 2 == 0)
+                                {
+                                    r=255;g=255;b=255;
+                                }
+                                else
+                                {
+                                    r=0;g=0;b=0;
+                                }
+                            }
+                            if (spectrumNum>4 && spectrumNum<5)
+                            {
+                                if ( Math.floor(x/10) % 2 == 0)
+                                {
+                                    r=0;g=0;b=0;
+                                }
+                                else
+                                {
+                                    r=255;g=255;b=255;
+                                }
+                            }
+                            if (spectrumNum>5 && spectrumNum<6)
+                            {
+                                if ( Math.floor(x/10) % 2 == 0)
+                                {
+                                    r=255;g=255;b=255;
+                                }
+                                else
+                                {
+                                    r=0;g=0;b=0;
+                                }
+                            }
+
+                            redcurrentcolorbit = 0;
+                            greencurrentcolorbit = 0;
+                            bluecurrentcolorbit = 0;
+                            blurpAdj=0;
+                        }
                         else
                         {
                             if (blurp) {blurpAdj+=1;}
@@ -195,9 +275,20 @@ var Title = new Phaser.Class({
                     var calcline = y+lineindex;
                     if (calcline>=this.t_height) calcline-=this.t_height;
 
+                    var calccolumn = x+lineindex;
+                    if (calccolumn>=this.t_width) calccolumn-=this.t_width;
+
+                    if (this.color=='checkered')
+                    {
+                        var bytesPerPixel=4;
+                        var targetIndex=(320*bytesPerPixel)*(y+blurpAdj)+(bytesPerPixel*calccolumn);
+                    }
+                    else
+                    {
+                        var bytesPerPixel=4;
+                        var targetIndex=(320*bytesPerPixel)*(calcline+blurpAdj)+(bytesPerPixel*x);
+                    }
                     
-                    var bytesPerPixel=4;
-                    var targetIndex=(320*bytesPerPixel)*(calcline+blurpAdj)+(bytesPerPixel*x);
 
                     //check current pixel to see if its one to animate
                     var red = this.pixels[targetIndex];

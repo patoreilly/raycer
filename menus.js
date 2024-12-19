@@ -99,24 +99,25 @@ var Menus = new Phaser.Class({
         //add the frame data for this frame into the sprite sheet
         canvasFrame.add(1, 0, tileSize, 0, tileSize, tileSize);
 
-        var sound_button = this.add.image(10, 10, randomKey1).setOrigin(0.5).setScale(1).setDepth(200).setInteractive();
+        this.sound_button = this.add.image(10, 10, randomKey1).setOrigin(0.5).setScale(1).setDepth(200).setInteractive();
 
         if (sound_enabled) 
         {
-            sound_button.setFrame(1)            
+            this.sound_button.setFrame(1)            
         } 
         else 
         {
-            sound_button.setFrame(0)
+            this.sound_button.setFrame(0)
         }
 
         
 
-        sound_button.on('pointerup', function () {
+        this.sound_button.on('pointerup', function () {
 
             if (sound_enabled)
             {
-                sound_button.setFrame(0);
+                this.sound_button.setFrame(0);
+                this.menu[1].buttons[0].setText('MUSIC off');
                 sound_enabled=false;
                 SIDplayer.stop();
                 
@@ -126,7 +127,8 @@ var Menus = new Phaser.Class({
             }
             else
             {
-                sound_button.setFrame(1);
+                this.sound_button.setFrame(1);
+                this.menu[1].buttons[0].setText('MUSIC on');
                 sound_enabled=true;
                 this.initSidAudio();
 
@@ -143,22 +145,40 @@ var Menus = new Phaser.Class({
 
         this.input.gamepad.on('down', function (pad, button, index) {
 
-            if (button.index==3 && sound_enabled)
+            // if (button.index==3 && sound_enabled)
+            // {
+            //     sound_button.setFrame(0);
+            //     sound_enabled=false;
+            //     SIDplayer.stop();
+            // }
+            if (button.index==2)
             {
-                sound_button.setFrame(0);
-                sound_enabled=false;
-                SIDplayer.stop();
+                if (sound_enabled)
+                {
+                    this.sound_button.setFrame(0);
+                    this.menu[1].buttons[0].setText('MUSIC off');
+                    sound_enabled=false;
+                    SIDplayer.stop();
+                }
+                else
+                {
+                    this.sound_button.setFrame(1);
+                    this.menu[1].buttons[0].setText('MUSIC on');
+                    sound_enabled=true;
+                    this.initSidAudio();
+                }
             }
-            if (button.index==2 && !sound_enabled)
-            {
-                sound_button.setFrame(1);
-                sound_enabled=true;
-                this.initSidAudio();
-            }
+            
+
+
+
+
+
+
             if (button.index==4)
             {
                 this.displayHideMenu();
-                this.scene.setVisible(false, 'about');
+                //this.scene.setVisible(false, 'about');
             }
             if (button.index==12)
             {
@@ -202,8 +222,9 @@ var Menus = new Phaser.Class({
         //options menu
         this.menu[1] = {}
 
-        
-        this.menu[1].items = ['FULLSCREEN on','FULLSCREEN off','DONE'];
+        var fullscreen_bt = fullscreen_enabled ? 'FULLSCREEN on' : 'FULLSCREEN off';
+
+        this.menu[1].items = ['MUSIC on',fullscreen_bt,'DONE'];
         this.menu[1].buttons = [];
 
         //total set of menu buttons that can be drawn
@@ -311,6 +332,9 @@ var Menus = new Phaser.Class({
 
     displayHideMenu: function ()
     {
+        this.scene.setVisible(false, 'about');
+        this.scene.setVisible(false, 'gameover');
+
         var title = this.scene.get('title');
         if (!menu_mode)
         {
@@ -437,7 +461,7 @@ var Menus = new Phaser.Class({
 
             case 3:
                 this.displayHideMenu();
-                this.scene.setActive(false, 'raycer');
+                //this.scene.setActive(false, 'raycer');
                 this.scene.launch('about');
 
                 break;
@@ -452,12 +476,37 @@ var Menus = new Phaser.Class({
 
             switch (selected_index)
             {
-            case 0:
-                this.scale.startFullscreen();
+
+            case 0: //toggle sound
+                if (sound_enabled)
+                {
+                    this.sound_button.setFrame(0);
+                    this.menu[1].buttons[0].setText('MUSIC off');
+                    sound_enabled=false;
+                    SIDplayer.stop();
+                }
+                else
+                {
+                    this.sound_button.setFrame(1);
+                    this.menu[1].buttons[0].setText('MUSIC on');
+                    sound_enabled=true;
+                    this.initSidAudio();
+                }
                 break;
 
-            case 1:
-                this.scale.stopFullscreen();
+            case 1: //toggle fullscreen
+                if (fullscreen_enabled)
+                {
+                    this.menu[1].buttons[1].setText('FULLSCREEN off');
+                    fullscreen_enabled=false;
+                    this.scale.stopFullscreen();
+                }
+                else
+                {
+                    this.menu[1].buttons[1].setText('FULLSCREEN on');
+                    fullscreen_enabled=true;
+                    this.scale.startFullscreen();
+                }
                 break;
 
             case 2:
@@ -489,7 +538,6 @@ var Menus = new Phaser.Class({
         if (Phaser.Input.Keyboard.JustDown(this.escape_key))
         {
             this.displayHideMenu();
-            this.scene.setVisible(false, 'about');
         }
 
         if (Phaser.Input.Keyboard.JustDown(this.enter_key))
