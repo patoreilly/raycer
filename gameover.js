@@ -108,16 +108,18 @@ var Gameover = new Phaser.Class({
 
         for (var i=0; i<10; i++)
         {
+            var finishtime_formated = this.raycer.race_finishers[i].finishtime.toFixed(3);
+
             if (i==playerRacePlacement)
             {
                 this.add.dynamicBitmapText(0, 0, 'raycertext', this.raycer.race_finishers[i].label).setOrigin(1,.5).setScale(1).setRightAlign().setPosition(150,50+(10*i)).setDepth(100);
-                this.add.dynamicBitmapText(0, 0, 'raycertext', this.raycer.race_finishers[i].finishtime).setOrigin(0,.5).setScale(1).setLeftAlign().setPosition(170,50+(10*i)).setDepth(100);
+                this.add.dynamicBitmapText(0, 0, 'raycertext', finishtime_formated).setOrigin(0,.5).setScale(1).setLeftAlign().setPosition(170,50+(10*i)).setDepth(100);
                 this.add.dynamicBitmapText(0, 0, 'raycertext', i+1).setOrigin(.5,.5).setScale(1).setPosition(256,50+(10*i)).setDepth(100);
             }
             else
             {
                 this.add.dynamicBitmapText(0, 0, 'labeltext', this.raycer.race_finishers[i].label).setOrigin(1,.5).setScale(1).setRightAlign().setPosition(150,50+(10*i)).setDepth(100);
-                this.add.dynamicBitmapText(0, 0, 'timetext', this.raycer.race_finishers[i].finishtime).setOrigin(0,.5).setScale(1).setLeftAlign().setPosition(170,50+(10*i)).setDepth(100);
+                this.add.dynamicBitmapText(0, 0, 'timetext', finishtime_formated).setOrigin(0,.5).setScale(1).setLeftAlign().setPosition(170,50+(10*i)).setDepth(100);
                 this.add.dynamicBitmapText(0, 0, 'placetext', i+1).setOrigin(.5,.5).setScale(1).setPosition(256,50+(10*i)).setDepth(100);
             }
             
@@ -125,8 +127,10 @@ var Gameover = new Phaser.Class({
 
         if (playerRacePlacement>9)
         {
+            var finishtime_formated = this.raycer.race_finishers[playerRacePlacement].finishtime.toFixed(3);
+            
             this.add.dynamicBitmapText(0, 0, 'raycertext', this.raycer.race_finishers[playerRacePlacement].label).setOrigin(1,.5).setScale(1).setRightAlign().setPosition(150,150).setDepth(100);
-            this.add.dynamicBitmapText(0, 0, 'raycertext', this.raycer.race_finishers[playerRacePlacement].finishtime).setOrigin(0,.5).setScale(1).setLeftAlign().setPosition(170,150).setDepth(100);
+            this.add.dynamicBitmapText(0, 0, 'raycertext', finishtime_formated).setOrigin(0,.5).setScale(1).setLeftAlign().setPosition(170,150).setDepth(100);
             this.add.dynamicBitmapText(0, 0, 'raycertext', playerRacePlacement+1).setOrigin(.5,.5).setScale(1).setPosition(256,150).setDepth(100);
         }
 
